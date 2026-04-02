@@ -31,22 +31,34 @@ const items = [
 ];
 
 const Technology = () => (
-  <div className="section-container pt-24 pb-12">
-    <SectionReveal>
-      <p className="text-primary uppercase tracking-widest text-sm mb-2">
-        Innovation
-      </p>
-      <h1 className="font-display text-4xl font-bold mb-4">
-        Technology & Manufacturing
-      </h1>
-      <p className="text-muted-foreground max-w-2xl mb-12">
-        Our state-of-the-art facility in Sialkot combines decades of artisan
-        expertise with modern CNC machining, ensuring every instrument meets the
-        highest international standards.
-      </p>
-    </SectionReveal>
+  <div className="pb-12">
+    {/* Full-width Hero Section */}
+    <section className="relative w-full h-[50vh] min-h-[450px] flex flex-col justify-center overflow-hidden mb-16">
+      <div 
+        className="absolute inset-0 w-full h-full bg-cover bg-center"
+        style={{ backgroundImage: "url('/tech-cnc.jpg')" }}
+      />
+      <div className="absolute inset-0 bg-black/65" /> {/* Dark Overlay */}
 
-    <div className="grid sm:grid-cols-2 gap-6 mb-16">
+      <div className="section-container relative z-10 text-center flex flex-col items-center pt-24">
+        <SectionReveal>
+          <p className="text-primary uppercase tracking-[0.3em] text-xs mb-4 font-bold">
+            Innovation
+          </p>
+          <h1 className="font-display text-5xl sm:text-6xl font-black mb-6 text-white drop-shadow-lg">
+            Technology & Manufacturing
+          </h1>
+          <p className="text-white/80 max-w-2xl mx-auto text-lg drop-shadow-md">
+            Our state-of-the-art facility in Sialkot combines decades of artisan
+            expertise with modern CNC machining, ensuring every instrument meets the
+            highest international standards.
+          </p>
+        </SectionReveal>
+      </div>
+    </section>
+
+    <div className="section-container">
+      <div className="grid sm:grid-cols-2 gap-6 mb-16">
       {items.map((item, i) => (
         <SectionReveal key={i} delay={i * 0.1}>
           <div className="glass-card overflow-hidden hover:border-primary/20 transition-all duration-500">
@@ -72,11 +84,15 @@ const Technology = () => (
     <SectionReveal>
       <div className="glass-card p-10 text-center">
         <h2 className="font-display text-2xl font-bold mb-3">Certifications</h2>
-        <p className="text-muted-foreground">
-          ISO 9001:2015 · ISO 13485:2016 · CE Marked · FDA Registered
-        </p>
+        <div className="flex flex-wrap items-center justify-evenly gap-10 mt-8">
+          <img src="/iso.png" alt="ISO 13485" className="w-[100px] h-[100px] object-contain" />
+          <img src="/sfda.svg" alt="SFDA" className="w-[100px] h-[100px] object-contain" />
+          <img src="/ce-mark-official.png" alt="CE Mark" className="w-[100px] h-[100px] object-contain" />
+          <img src="/fda.png" alt="FDA" className="w-[100px] h-[100px] object-contain" />
+        </div>
       </div>
     </SectionReveal>
+    </div>
   </div>
 );
 

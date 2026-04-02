@@ -28,7 +28,7 @@ const Products = () => {
       <div className="section-container mb-16 text-center flex flex-col items-center">
         <TextReveal>
           <p className="text-primary uppercase tracking-[0.3em] text-xs mb-4 font-bold">
-            Catalog
+            BROWSE
           </p>
           <h1 className="font-display text-5xl sm:text-6xl font-black mb-6 text-foreground">
             Our Categories
