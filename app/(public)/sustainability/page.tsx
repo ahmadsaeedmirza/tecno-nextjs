@@ -38,32 +38,32 @@ const initiatives = [
 export default function SustainabilityPage() {
   return (
     <div className="min-h-screen bg-white text-black overflow-hidden">
-      {/* Full-width Hero Section */}
-      <section className="relative w-full h-[50vh] min-h-[450px] flex flex-col justify-center overflow-hidden mb-16">
+      {/* Full-width Hero Image */}
+      <section className="relative w-full h-[50vh] min-h-[400px] overflow-hidden">
         <div
           className="absolute inset-0 w-full h-full bg-cover bg-center"
-          style={{ backgroundImage: "url('/hero-factory.jpg')" }}
+          style={{ backgroundImage: "url('/solars.jpg')" }}
         />
-        <div className="absolute inset-0 bg-black/65" /> {/* Dark Overlay */}
+      </section>
 
-        <div className="section-container relative z-10 text-center flex flex-col items-center pt-24">
-          <StaggerContainer staggerChildren={0.2} delayChildren={0.3}>
-            <StaggerItem>
-              <div className="max-w-3xl mx-auto text-center">
-                <p className="text-primary uppercase tracking-[0.3em] text-xs mb-4 font-bold">
-                  ECO-FRIENDLY
-                </p>
-                <h1 className="font-display text-5xl sm:text-6xl font-black mb-6 text-white drop-shadow-lg">
-                  Sustainability
-                </h1>
-                <p className="text-white/80 text-xl drop-shadow-md">
-                  Our commitment to environmental responsibility and sustainable
-                  manufacturing practices
-                </p>
-              </div>
-            </StaggerItem>
-          </StaggerContainer>
-        </div>
+      {/* Hero Text */}
+      <section className="section-container pt-16 pb-8 flex flex-col items-center w-full">
+        <StaggerContainer staggerChildren={0.2} delayChildren={0.1}>
+          <StaggerItem>
+            <div className="max-w-3xl mx-auto text-center mb-8">
+              <p className="text-primary uppercase tracking-[0.3em] text-sm mb-4 font-bold">
+                ECO-FRIENDLY
+              </p>
+              <h1 className="font-display text-5xl sm:text-6xl font-black mb-6 text-foreground">
+                Sustainability
+              </h1>
+              <p className="text-muted-foreground text-xl leading-relaxed">
+                Our commitment to environmental responsibility and sustainable
+                manufacturing practices
+              </p>
+            </div>
+          </StaggerItem>
+        </StaggerContainer>
       </section>
 
       {/* Initiatives Zig Zag Rows */}
