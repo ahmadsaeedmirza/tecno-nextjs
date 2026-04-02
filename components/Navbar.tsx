@@ -35,8 +35,8 @@ const Navbar = () => {
   const [showLang, setShowLang] = useState(false);
   const [currentLang, setCurrentLang] = useState("en");
   const pathname = usePathname();
-  const dropdownTimeout = useRef<NodeJS.Timeout>();
-  const langTimeout = useRef<NodeJS.Timeout>();
+  const dropdownTimeout = useRef<NodeJS.Timeout | undefined>(undefined);
+  const langTimeout = useRef<NodeJS.Timeout | undefined>(undefined);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 50);
