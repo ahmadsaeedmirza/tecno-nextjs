@@ -18,64 +18,30 @@ export interface Category {
   productCount: number;
 }
 
-export const categories: Category[] = [
-  {
-    slug: "scissors",
-    name: "Scissors",
-    description: "Precision surgical scissors for every application",
-    image: "/products/mayo-scissors.jpg",
-    productCount: 12,
-  },
-  {
-    slug: "forceps",
-    name: "Forceps",
-    description: "High-quality forceps for delicate procedures",
-    image: "/products/adson-forceps.jpg",
-    productCount: 18,
-  },
-  {
-    slug: "needle-holders",
-    name: "Needle Holders",
-    description: "Ergonomic needle holders with superior grip",
-    image: "/products/needle-holder.jpg",
-    productCount: 9,
-  },
-  {
-    slug: "retractors",
-    name: "Retractors",
-    description: "Self-retaining and hand-held retractors",
-    image: "/products/retractor.jpg",
-    productCount: 15,
-  },
-  {
-    slug: "clamps",
-    name: "Clamps",
-    description: "Vascular and general-purpose clamps",
-    image: "/products/kelly-clamp.jpg",
-    productCount: 11,
-  },
-  {
-    slug: "bone-instruments",
-    name: "Bone Instruments",
-    description: "Orthopedic and bone surgery instruments",
-    image: "/products/bone-rongeur.jpg",
-    productCount: 14,
-  },
-  {
-    slug: "dental",
-    name: "Dental Instruments",
-    description: "Complete range of dental surgical tools",
-    image: "/products/needle-holder.jpg",
-    productCount: 20,
-  },
-  {
-    slug: "beauty",
-    name: "Beauty Instruments",
-    description: "Professional beauty and cosmetic tools",
-    image: "/products/mayo-scissors.jpg",
-    productCount: 8,
-  },
+const categoryNames = [
+  "Bipolar Forceps", "Monopolar Forceps", "Bipolar Forceps (Non-Stick)", "Bipolar Forceps (Ultra Non-Stick)", 
+  "Bipolar Forceps (Hand-Switch)", "Bipolar Forceps (Irrigation)", "Bipolar Forceps (Non-Insulated)", 
+  "Monopolar Forceps (Hand-Switch)", "Monopolar Forceps (Hand-Switch Non-Stick)", "European Bipolar Forceps", 
+  "European Bipolar Forceps (Non-Stick)", "European Bipolar Forceps (Ultra Non-Stick)", "European Bipolar Forceps (Irrigation)", 
+  "European Bipolar Forceps (Suction)", "European Bipolar Forceps (Tungsten Carbide)", "Bipolar Forceps Single-Use (Molded)", 
+  "Bipolar Forceps Single-Use", "Bipolar Forceps Single-Use (Non-Stick)", "Bipolar Forceps Single-Use (Ultra Non-Stick)", 
+  "Bipolar Forceps Single-Use (Non-Insulated)", "European Bipolar Forceps Single-Use", "European Bipolar Forceps Single-Use (Non-Stick)", 
+  "European Bipolar Forceps Single-Use (Ultra Non-Stick)", "Bipolar Artery Sealers", "Bipolar Scissors", 
+  "Bipolar Clamp Scissors", "Tonsillectomy Bipolar Clamp", "Endoscopic Bipolar Forceps", "Polypectomy Snare", 
+  "Diathermy Instruments", "Bipolar Electrodes", "Bipolar Electrodes Single-Use", "Bipolar Cables", 
+  "Monopolar Cables", "Bipolar Cables Single-Use", "Monopolar Cables Single-Use", "Electrosurgical Pencils", 
+  "Electrodes (2.4 Mm) Non-Stick", "Tungsten Needle Electrodes (2.4 Mm)", "Conization Electrodes (2.4 Mm)", 
+  "Electrodes (4.0 Mm)", "Electrodes (1.6 Mm) Single-Use", "Arthroscopic Electrodes", 
+  "Electrosurgical Instruments For Gynecology", "Retractors And Skin Hooks", "Sterilization Trays"
 ];
+
+export const categories: Category[] = categoryNames.map((name, index) => ({
+  slug: name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+  name,
+  description: `Premium ${name} for professional clinical and surgical use.`,
+  image: "/categories/dummy.jpg",
+  productCount: 10 + (index * 7) % 40,
+}));
 
 export const products: Product[] = [
   {

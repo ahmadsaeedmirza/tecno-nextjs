@@ -101,7 +101,7 @@ const Navbar = () => {
                   onMouseEnter={handleProductsEnter}
                   onMouseLeave={handleProductsLeave}
                 >
-                  {categories.map((cat) => (
+                  {categories.slice(0, 8).map((cat) => (
                     <Link
                       key={cat.slug}
                       href={`/products/${cat.slug}`}
@@ -113,8 +113,8 @@ const Navbar = () => {
                         alt={cat.name}
                         className="w-10 h-10 rounded-md object-cover flex-shrink-0"
                       />
-                      <div>
-                        <p className="text-xs font-bold text-foreground group-hover:text-primary transition-colors">
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold text-foreground group-hover:text-primary transition-colors truncate">
                           {cat.name}
                         </p>
                         <p className="text-[10px] text-muted-foreground">

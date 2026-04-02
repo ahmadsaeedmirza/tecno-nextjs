@@ -7,51 +7,33 @@ import {
   StaggerItem,
 } from "@/components/ScrollReveal";
 
-// Sample categories - replace with actual data from products.ts
-const categories = [
-  {
-    slug: "surgical",
-    name: "Surgical Instruments",
-    description:
-      "Premium surgical instruments for precision medical procedures",
-    productCount: 150,
-    image: "/images/surgical.jpg",
-  },
-  {
-    slug: "dental",
-    name: "Dental Instruments",
-    description: "Professional dental tools and instruments",
-    productCount: 120,
-    image: "/images/dental.jpg",
-  },
-  {
-    slug: "beauty",
-    name: "Beauty Instruments",
-    description: "Cosmetic and beauty procedure instruments",
-    productCount: 80,
-    image: "/images/beauty.jpg",
-  },
-  {
-    slug: "gynecology",
-    name: "Gynecology Instruments",
-    description: "Specialized gynecological examination instruments",
-    productCount: 60,
-    image: "/images/gynecology.jpg",
-  },
-];
+import { categories } from "@/data/products";
 
 const Products = () => {
   return (
-    <div className="pt-24 pb-20">
-      <div className="section-container mb-16">
+    <div className="pb-20">
+      {/* Complete Height Looping Video */}
+      <section className="w-full mb-16">
+        <video
+          src="/tecno-hero-video.webm"
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="w-full h-auto block"
+        />
+      </section>
+
+      {/* Page Title */}
+      <div className="section-container mb-16 text-center flex flex-col items-center">
         <TextReveal>
-          <p className="text-primary uppercase tracking-[0.3em] text-xs mb-4">
+          <p className="text-primary uppercase tracking-[0.3em] text-xs mb-4 font-bold">
             Catalog
           </p>
-          <h1 className="font-display text-5xl sm:text-6xl font-black mb-6">
-            Our Products
+          <h1 className="font-display text-5xl sm:text-6xl font-black mb-6 text-foreground">
+            Our Categories
           </h1>
-          <p className="text-muted-foreground max-w-xl text-lg">
+          <p className="text-muted-foreground max-w-xl mx-auto text-lg">
             Browse our complete range of surgical, dental, and beauty
             instruments by category.
           </p>
