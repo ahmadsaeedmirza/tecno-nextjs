@@ -12,95 +12,204 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { countries } from "@/data/countries";
+import { useState, useEffect } from "react";
+import { adminFetch } from "@/lib/api-client";
+import { useToast } from "@/hooks/use-toast";
+import { Loader2 } from "lucide-react";
 
-const Contact = () => (
-  <div className="pb-24 bg-white text-black min-h-screen">
-    {/* Full-width Hero Image */}
-    <section className="relative w-full h-[50vh] min-h-[400px] overflow-hidden">
-      <div
-        className="absolute inset-0 w-full h-full bg-cover bg-center"
-        style={{ backgroundImage: "url('/about-factory.jpg')" }}
-      />
-      <div className="absolute inset-0 bg-black/40" />
-    </section>
+interface Category {
+  _id: string;
+  name: string;
+}
 
-    {/* Hero Text */}
-    <section className="section-container pt-16 pb-12 flex flex-col items-center w-full">
-      <SectionReveal>
-        <div className="max-w-3xl mx-auto text-center mb-8">
-          <p className="text-primary uppercase tracking-[0.3em] text-sm mb-4 font-bold">
-            Get In Touch
-          </p>
-          <h1 className="font-display text-5xl sm:text-6xl font-black mb-6 text-foreground">
-            Contact Us
-          </h1>
-          <p className="text-muted-foreground text-xl leading-relaxed max-w-2xl mx-auto">
-            We are here to assist you. Reach out for any inquiries, support, or partnership opportunities and our team will get back to you promptly.
-          </p>
-        </div>
-      </SectionReveal>
-    </section>
+interface Product {
+  _id: string;
+  name: string;
+  catagory: string | { _id: string };
+}
+
+const Contact = () => {
+  const { toast } = useToast();
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Form State
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    companyName: "",
+    country: "",
+    catagory: "",
+    product: "",
+    message: "",
+  });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        const [catRes, prodRes] = await Promise.all([
+          fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/v1/catagories`).then(r => r.json()),
+          fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/v1/products`).then(r => r.json()),
+        ]);
+        setCategories(catRes.data.data);
+        setProducts(prodRes.data.data);
+      } catch (err) {
+        console.error("Failed to fetch contact data", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  // Filter products when category changes
+  useEffect(() => {
+    if (formData.catagory) {
+      const filtered = products.filter(p => {
+        const catId = typeof p.catagory === 'string' ? p.catagory : p.catagory?._id;
+        return catId === formData.catagory;
+      });
+      setFilteredProducts(filtered);
+      // Reset product if it's not in the new category
+      if (!filtered.find(p => p._id === formData.product)) {
+        setFormData(prev => ({ ...prev, product: "" }));
+      }
+    } else {
+      setFilteredProducts([]);
+    }
+  }, [formData.catagory, products]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/v1/inquiries`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      if (!res.ok) throw new Error("Failed to send inquiry");
+
+      toast({
+        title: "Inquiry Sent!",
+        description: "We have received your message and will get back to you soon.",
+      });
+
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        companyName: "",
+        country: "",
+        catagory: "",
+        product: "",
+        message: "",
+      });
+    } catch (err: any) {
+      toast({
+        title: "Submission Failed",
+        description: err.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="pb-24 bg-white text-black min-h-screen">
+      {/* Full-width Hero Image */}
+      <section className="relative w-full h-[50vh] min-h-[400px] overflow-hidden">
+        <div
+          className="absolute inset-0 w-full h-full bg-cover bg-center"
+          style={{ backgroundImage: "url('/about-factory.jpg')" }}
+        />
+        <div className="absolute inset-0 bg-black/40" />
+      </section>
+
+      {/* Hero Text */}
+      <section className="section-container pt-16 pb-12 flex flex-col items-center w-full">
+        <SectionReveal>
+          <div className="max-w-3xl mx-auto text-center mb-8">
+            <p className="text-primary uppercase tracking-[0.3em] text-sm mb-4 font-bold">
+              Get In Touch
+            </p>
+            <h1 className="font-display text-5xl sm:text-6xl font-black mb-6 text-foreground">
+              Contact Us
+            </h1>
+            <p className="text-muted-foreground text-xl leading-relaxed max-w-2xl mx-auto">
+              We are here to assist you. Reach out for any inquiries, support, or partnership opportunities and our team will get back to you promptly.
+            </p>
+          </div>
+        </SectionReveal>
+      </section>
 
     <section className="section-container max-w-6xl">
-      <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-start">
-        <SectionReveal>
-          <div className="space-y-6">
-            <h2 className="font-display text-2xl font-bold mb-6">Contact Information</h2>
-            {[
-              {
-                icon: MapPin,
-                label: "Address",
-                value: "Industrial Estate, Sialkot 51310, Pakistan",
-              },
-              { icon: Phone, label: "Phone", value: "+92 52 1234567" },
-              { icon: Mail, label: "Email", value: "info@tecnoinstruments.com" },
-              {
-                icon: Clock,
-                label: "Hours",
-                value: "Mon–Sat, 9:00 AM – 6:00 PM (PKT)",
-              },
-            ].map((c, i) => (
-              <div key={i} className="glass-card p-6 flex items-start gap-4 shadow-sm hover:shadow-md transition-shadow">
-                <c.icon className="w-6 h-6 text-primary flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-display font-bold text-base mb-1 text-foreground">
-                    {c.label}
-                  </p>
-                  <p className="text-muted-foreground text-sm leading-relaxed">{c.value}</p>
+      <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-stretch">
+        <SectionReveal className="h-full">
+          <div className="flex flex-col h-full justify-between gap-8">
+            <div className="space-y-6">
+              <h2 className="font-display text-2xl font-bold mb-6">Contact Information</h2>
+              {[
+                {
+                  icon: MapPin,
+                  label: "Address",
+                  value: "Industrial Estate, Sialkot 51310, Pakistan",
+                },
+                { icon: Phone, label: "Phone", value: "+92 52 1234567" },
+                { icon: Mail, label: "Email", value: "info@tecnoinstruments.com" },
+                {
+                  icon: Clock,
+                  label: "Hours",
+                  value: "Mon–Sat, 9:00 AM – 6:00 PM (PKT)",
+                },
+              ].map((c, i) => (
+                <div key={i} className="glass-card p-6 flex items-start gap-4 shadow-sm hover:shadow-md transition-shadow">
+                  <c.icon className="w-6 h-6 text-primary flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-display font-bold text-base mb-1 text-foreground">
+                      {c.label}
+                    </p>
+                    <p className="text-muted-foreground text-sm leading-relaxed">{c.value}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
 
-          <div className="mt-6 p-8 glass-card shadow-sm border-t-4 border-t-primary/80">
-            <h3 className="font-display font-bold text-xl mb-3 text-foreground">Connect With Us</h3>
-            <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
-              Follow our official channels to stay updated on our latest medical instrument innovations and company news.
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <a href="https://www.linkedin.com/" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2.5 p-3 rounded-xl border border-border/50 bg-secondary hover:bg-[#0A66C2]/10 hover:border-[#0A66C2]/30 hover:text-[#0A66C2] transition-all group">
-                <FontAwesomeIcon icon={faLinkedin} className="w-5 h-5 text-muted-foreground group-hover:text-[#0A66C2] transition-all" />
-                <span className="text-sm font-semibold">LinkedIn</span>
-              </a>
-              <a href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2.5 p-3 rounded-xl border border-border/50 bg-secondary hover:bg-[#1877F2]/10 hover:border-[#1877F2]/30 hover:text-[#1877F2] transition-all group">
-                <FontAwesomeIcon icon={faFacebookSquare} className="w-5 h-5 text-muted-foreground group-hover:text-[#1877F2] transition-all" />
-                <span className="text-sm font-semibold">Facebook</span>
-              </a>
-              <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2.5 p-3 rounded-xl border border-border/50 bg-secondary hover:bg-[#E4405F]/10 hover:border-[#E4405F]/30 hover:text-[#E4405F] transition-all group">
-                <FontAwesomeIcon icon={faInstagram} className="w-5 h-5 text-muted-foreground group-hover:text-[#E4405F] transition-all" />
-                <span className="text-sm font-semibold">Instagram</span>
-              </a>
+            <div className="p-8 glass-card shadow-sm border-t-4 border-t-primary/80 flex flex-col justify-center">
+              <h3 className="font-display font-bold text-xl mb-3 text-foreground">Connect With Us</h3>
+              <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
+                Follow our official channels to stay updated on our latest medical instrument innovations and company news.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <a href="https://www.linkedin.com/" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2.5 p-3 rounded-xl border border-border/50 bg-secondary hover:bg-[#0A66C2]/10 hover:border-[#0A66C2]/30 hover:text-[#0A66C2] transition-all group">
+                  <FontAwesomeIcon icon={faLinkedin} className="w-5 h-5 text-muted-foreground group-hover:text-[#0A66C2] transition-all" />
+                  <span className="text-sm font-semibold">LinkedIn</span>
+                </a>
+                <a href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2.5 p-3 rounded-xl border border-border/50 bg-secondary hover:bg-[#1877F2]/10 hover:border-[#1877F2]/30 hover:text-[#1877F2] transition-all group">
+                  <FontAwesomeIcon icon={faFacebookSquare} className="w-5 h-5 text-muted-foreground group-hover:text-[#1877F2] transition-all" />
+                  <span className="text-sm font-semibold">Facebook</span>
+                </a>
+                <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2.5 p-3 rounded-xl border border-border/50 bg-secondary hover:bg-[#E4405F]/10 hover:border-[#E4405F]/30 hover:text-[#E4405F] transition-all group">
+                  <FontAwesomeIcon icon={faInstagram} className="w-5 h-5 text-muted-foreground group-hover:text-[#E4405F] transition-all" />
+                  <span className="text-sm font-semibold">Instagram</span>
+                </a>
+              </div>
             </div>
           </div>
         </SectionReveal>
 
-        <SectionReveal delay={0.15}>
+        <SectionReveal delay={0.15} className="h-full">
           <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              alert("Demo mode: Message received!");
-            }}
-            className="glass-card p-8 shadow-xl"
+            onSubmit={handleSubmit}
+            className="glass-card p-8 shadow-xl h-full flex flex-col"
           >
             <h2 className="font-display text-2xl font-bold mb-8">
               Send a Message
@@ -115,6 +224,8 @@ const Contact = () => (
                   required
                   className="w-full px-4 py-3 rounded-lg bg-transparent border-2 border-border text-foreground text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary relative z-0 placeholder-transparent"
                   placeholder="Your Name"
+                  value={formData.name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                 />
               </div>
 
@@ -127,6 +238,8 @@ const Contact = () => (
                   type="email"
                   className="w-full px-4 py-3 rounded-lg bg-transparent border-2 border-border text-foreground text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary relative z-0 placeholder-transparent"
                   placeholder="Email"
+                  value={formData.email}
+                  onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                 />
               </div>
 
@@ -139,6 +252,8 @@ const Contact = () => (
                   type="tel"
                   className="w-full px-4 py-3 rounded-lg bg-transparent border-2 border-border text-foreground text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary relative z-0 placeholder-transparent"
                   placeholder="Phone Number"
+                  value={formData.phone}
+                  onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
                 />
               </div>
 
@@ -149,6 +264,8 @@ const Contact = () => (
                 <input
                   className="w-full px-4 py-3 rounded-lg bg-transparent border-2 border-border text-foreground text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary relative z-0 placeholder-transparent"
                   placeholder="Company Name"
+                  value={formData.companyName}
+                  onChange={(e) => setFormData(prev => ({ ...prev, companyName: e.target.value }))}
                 />
               </div>
 
@@ -156,7 +273,11 @@ const Contact = () => (
                 <label className="absolute -top-2.5 left-3 px-1 bg-[#F6F5F4CC] text-xs font-bold text-muted-foreground z-10 backdrop-blur-sm rounded">
                   Country *
                 </label>
-                <Select required>
+                <Select 
+                  required 
+                  value={formData.country} 
+                  onValueChange={(val) => setFormData(prev => ({ ...prev, country: val }))}
+                >
                   <SelectTrigger className="w-full px-4 py-[11px] min-h-[46px] rounded-lg bg-transparent border-2 border-border text-foreground text-sm focus:ring-1 focus:ring-primary focus:border-primary relative z-0 appearance-none">
                     <SelectValue placeholder={<span className="text-muted-foreground">Select Country</span>} />
                   </SelectTrigger>
@@ -179,13 +300,47 @@ const Contact = () => (
 
               <div className="relative">
                 <label className="absolute -top-2.5 left-3 px-1 bg-[#F6F5F4CC] text-xs font-bold text-muted-foreground z-10 backdrop-blur-sm rounded">
-                  Subject *
+                  Category *
                 </label>
-                <input
-                  required
-                  className="w-full px-4 py-3 rounded-lg bg-transparent border-2 border-border text-foreground text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary relative z-0 placeholder-transparent"
-                  placeholder="Subject"
-                />
+                <Select 
+                  required 
+                  value={formData.catagory} 
+                  onValueChange={(val) => setFormData(prev => ({ ...prev, catagory: val }))}
+                >
+                  <SelectTrigger className="w-full px-4 py-[11px] min-h-[46px] rounded-lg bg-transparent border-2 border-border text-foreground text-sm focus:ring-1 focus:ring-primary focus:border-primary relative z-0 appearance-none">
+                    <SelectValue placeholder={<span className="text-muted-foreground">Select Category</span>} />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white z-50 max-h-80">
+                    {categories.map((c) => (
+                      <SelectItem key={c._id} value={c._id}>
+                        {c.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="relative">
+                <label className="absolute -top-2.5 left-3 px-1 bg-[#F6F5F4CC] text-xs font-bold text-muted-foreground z-10 backdrop-blur-sm rounded">
+                  Product *
+                </label>
+                <Select 
+                  required 
+                  value={formData.product} 
+                  onValueChange={(val) => setFormData(prev => ({ ...prev, product: val }))}
+                  disabled={!formData.catagory}
+                >
+                  <SelectTrigger className="w-full px-4 py-[11px] min-h-[46px] rounded-lg bg-transparent border-2 border-border text-foreground text-sm focus:ring-1 focus:ring-primary focus:border-primary relative z-0 appearance-none">
+                    <SelectValue placeholder={<span className="text-muted-foreground">Select Product</span>} />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white z-50 max-h-80">
+                    {filteredProducts.map((p) => (
+                      <SelectItem key={p._id} value={p._id}>
+                        {p.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="relative">
@@ -197,15 +352,25 @@ const Contact = () => (
                   rows={4}
                   className="w-full px-4 py-3 rounded-lg bg-transparent border-2 border-border text-foreground text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary resize-none relative z-0 placeholder-transparent"
                   placeholder="Message"
+                  value={formData.message}
+                  onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))}
                 />
               </div>
             </div>
 
-            <button
-              type="submit"
-              className="gradient-button px-6 py-4 mt-8 text-base font-bold w-full rounded-xl shadow-lg hover:shadow-xl transition-all"
-            >
-              Send Message
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="gradient-button px-6 py-4 mt-auto text-base font-bold w-full rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
+              >
+              {isSubmitting ? (
+                <div className="flex items-center justify-center gap-2">
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Sending...
+                </div>
+              ) : (
+                "Send Message"
+              )}
             </button>
           </form>
         </SectionReveal>
@@ -230,8 +395,8 @@ const Contact = () => (
           </div>
         </div>
       </SectionReveal>
-    </section>
-  </div>
-);
-
+      </section>
+    </div>
+  );
+};
 export default Contact;

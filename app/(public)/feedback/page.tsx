@@ -24,6 +24,14 @@ const ratingQuestions = [
 
 const Feedback = () => {
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    companyName: "",
+    country: "",
+    message: ""
+  });
   const [ratings, setRatings] = useState<Record<string, number>>({
     quality: 0,
     packaging: 0,
@@ -50,7 +58,36 @@ const Feedback = () => {
     setRatings((prev) => ({ ...prev, [key]: val }));
   };
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
   const allRated = Object.values(ratings).every((v) => v > 0);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!allRated || !isHuman) return;
+
+    try {
+      setIsSubmitting(true);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/v1/feedbacks`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...formData,
+          ...ratings
+        })
+      });
+
+      if (!res.ok) throw new Error("Failed to submit feedback");
+      setSubmitted(true);
+    } catch (err) {
+      alert("Something went wrong! Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="pb-24 bg-white text-black min-h-screen">
@@ -83,10 +120,7 @@ const Feedback = () => {
       <section className="section-container max-w-4xl">
 
       <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          if (allRated && isHuman) setSubmitted(true);
-        }}
+        onSubmit={handleSubmit}
         className="glass-card p-8 space-y-8 shadow-xl"
       >
         <div className="flex flex-col gap-8 pt-2">
@@ -96,6 +130,9 @@ const Feedback = () => {
             </label>
             <input
               required
+              name="name"
+              value={formData.name}
+              onChange={handleInputChange}
               className="w-full px-4 py-3 rounded-lg bg-transparent border-2 border-border text-foreground text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary relative z-0 placeholder-transparent"
               placeholder="Your Name"
             />
@@ -108,6 +145,9 @@ const Feedback = () => {
             <input
               required
               type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleInputChange}
               className="w-full px-4 py-3 rounded-lg bg-transparent border-2 border-border text-foreground text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary relative z-0 placeholder-transparent"
               placeholder="Email"
             />
@@ -118,6 +158,9 @@ const Feedback = () => {
               Company Name
             </label>
             <input
+              name="companyName"
+              value={formData.companyName}
+              onChange={handleInputChange}
               className="w-full px-4 py-3 rounded-lg bg-transparent border-2 border-border text-foreground text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary relative z-0 placeholder-transparent"
               placeholder="Company Name"
             />
@@ -127,13 +170,16 @@ const Feedback = () => {
             <label className="absolute -top-2.5 left-3 px-1 bg-[#F6F5F4CC] text-xs font-bold text-muted-foreground z-10 backdrop-blur-sm rounded">
               Country *
             </label>
-            <Select required>
+            <Select 
+              onValueChange={(val) => setFormData(prev => ({ ...prev, country: val }))}
+              required
+            >
               <SelectTrigger className="w-full px-4 py-[11px] min-h-[46px] rounded-lg bg-transparent border-2 border-border text-foreground text-sm focus:ring-1 focus:ring-primary focus:border-primary relative z-0 appearance-none">
                 <SelectValue placeholder={<span className="text-muted-foreground">Select Country</span>} />
               </SelectTrigger>
               <SelectContent className="bg-white z-50 max-h-80">
                 {countries.filter((c) => c.code !== "").map((c) => (
-                  <SelectItem key={c.code} value={c.code} className="cursor-pointer focus:bg-primary focus:text-white transition-colors duration-150 group">
+                  <SelectItem key={c.code} value={c.name} className="cursor-pointer focus:bg-primary focus:text-white transition-colors duration-150 group">
                     <div className="flex items-center gap-3">
                       <img
                         src={`https://flagcdn.com/w20/${c.code.toLowerCase()}.png`}
@@ -183,6 +229,9 @@ const Feedback = () => {
             <textarea
               required
               rows={5}
+              name="message"
+              value={formData.message}
+              onChange={handleInputChange}
               className="w-full px-4 py-5 rounded-lg bg-transparent border-2 border-border text-foreground text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary resize-none relative z-0 placeholder-transparent"
               placeholder="Your feedback"
             />
@@ -200,10 +249,10 @@ const Feedback = () => {
 
           <button
             type="submit"
-            disabled={!allRated || !isHuman}
+            disabled={!allRated || !isHuman || isSubmitting}
             className="gradient-button px-10 py-4 text-base font-bold w-full sm:w-auto min-w-[200px] disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl rounded-xl"
           >
-            Submit Feedback
+            {isSubmitting ? "Submitting..." : "Submit Feedback"}
           </button>
         </div>
       </form>
