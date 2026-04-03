@@ -43,3 +43,8 @@ yarn-error.log*
 *.sln
 *.sw?
 node_modules
+
+backend/public/js/bundle.js
+backend/public/js/bundle.js.map
+backend/public/js/mapbox.js
+backend/public/tour.html
