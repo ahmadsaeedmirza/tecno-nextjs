@@ -5,98 +5,103 @@ import { MapPin, Phone, Mail, Clock } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFacebookSquare, faInstagram, faLinkedin } from "@fortawesome/free-brands-svg-icons";
 
+import { useTranslations } from "next-intl";
+
 const tecnoLogo = "/tecno-logo.webp";
 
-const Footer = () => (
-  <footer className="bg-muted/50 border-t border-border/30 pt-14 pb-8">
-    <div className="section-container">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 mb-12">
-        {/* Brand + Contact Info */}
-        <div className="lg:col-span-1">
-          <Link href="/" className="flex items-center gap-2 mb-4">
-            <img src={tecnoLogo} alt="TECNO" className="h-16 w-auto" />
-          </Link>
-          <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-            Leading manufacturer and exporter of premium surgical, dental, and
-            beauty instruments since 1998.
-          </p>
+const Footer = () => {
+  const t = useTranslations("Footer");
+  const navT = useTranslations("Navbar");
 
-          <div className="flex items-center gap-6 mt-6">
-            <a
-              href="https://www.facebook.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <FontAwesomeIcon
-                icon={faFacebookSquare}
-                className="text-muted-foreground hover:text-[#1877F2] transition-colors duration-300 cursor-pointer h-10 w-10"
-              />
-            </a>
-            <a
-              href="https://www.instagram.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <FontAwesomeIcon
-                icon={faInstagram}
-                className="text-muted-foreground hover:text-[#E4405F] transition-colors duration-300 cursor-pointer h-10 w-10"
-              />
-            </a>
-            <a
-              href="https://www.linkedin.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <FontAwesomeIcon
-                icon={faLinkedin}
-                className="text-muted-foreground hover:text-[#0A66C2] transition-colors duration-300 cursor-pointer h-10 w-10"
-              />
-            </a>
+  return (
+    <footer className="bg-muted/50 border-t border-border/30 pt-14 pb-8">
+      <div className="section-container">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 mb-12">
+          {/* Brand + Contact Info */}
+          <div className="lg:col-span-1">
+            <Link href="/" className="flex items-center gap-2 mb-4">
+              <img src={tecnoLogo} alt="TECNO" className="h-16 w-auto" />
+            </Link>
+            <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+              {t("description")}
+            </p>
+
+            <div className="flex items-center gap-6 mt-6">
+              <a
+                href="https://www.facebook.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <FontAwesomeIcon
+                  icon={faFacebookSquare}
+                  className="text-muted-foreground hover:text-[#1877F2] transition-colors duration-300 cursor-pointer h-10 w-10"
+                />
+              </a>
+              <a
+                href="https://www.instagram.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <FontAwesomeIcon
+                  icon={faInstagram}
+                  className="text-muted-foreground hover:text-[#E4405F] transition-colors duration-300 cursor-pointer h-10 w-10"
+                />
+              </a>
+              <a
+                href="https://www.linkedin.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <FontAwesomeIcon
+                  icon={faLinkedin}
+                  className="text-muted-foreground hover:text-[#0A66C2] transition-colors duration-300 cursor-pointer h-10 w-10"
+                />
+              </a>
+            </div>
           </div>
-        </div>
 
-        {/* Quick Links */}
-        <div>
-          <h4 className="font-display font-bold text-sm uppercase tracking-[0.2em] text-foreground mb-4">
-            Quick Links
-          </h4>
-          <ul className="space-y-2 text-sm text-muted-foreground">
-            {[
-              ["Products", "/products"],
-              ["Technology", "/technology"],
-              ["Sustainability", "/sustainability"],
-              ["About", "/about"],
-            ].map(([l, h]) => (
-              <li key={h}>
-                <Link href={h} className="hover:text-primary transition-colors">
-                  {l}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
+          {/* Quick Links */}
+          <div>
+            <h4 className="font-display font-bold text-sm uppercase tracking-[0.2em] text-foreground mb-4">
+              {t("links")}
+            </h4>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              {[
+                [navT("products"), "/products"],
+                [navT("technology"), "/technology"],
+                [navT("sustainability"), "/sustainability"],
+                [navT("about"), "/about"],
+              ].map(([l, h]) => (
+                <li key={h}>
+                  <Link href={h} className="hover:text-primary transition-colors">
+                    {l}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-        {/* Support */}
-        <div>
-          <h4 className="font-display font-bold text-sm uppercase tracking-[0.2em] text-foreground mb-4">
-            Support
-          </h4>
-          <ul className="space-y-2 text-sm text-muted-foreground">
-            {[
-              ["Contact", "/contact"],
-              ["Inquiry", "/inquiry"],
-              ["Feedback", "/feedback"],
-              ["Privacy Policy", "/privacy"],
-              ["Terms", "/terms"],
-            ].map(([l, h]) => (
-              <li key={h}>
-                <Link href={h} className="hover:text-primary transition-colors">
-                  {l}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
+          {/* Support */}
+          <div>
+            <h4 className="font-display font-bold text-sm uppercase tracking-[0.2em] text-foreground mb-4">
+              Support
+            </h4>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              {[
+                [navT("contact"), "/contact"],
+                ["Inquiry", "/inquiry"],
+                [navT("feedback"), "/feedback"],
+                ["Privacy Policy", "/privacy"],
+                ["Terms", "/terms"],
+              ].map(([l, h]) => (
+                <li key={h}>
+                  <Link href={h} className="hover:text-primary transition-colors">
+                    {l}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
 
         {/* Contact */}
         <div>
@@ -184,7 +189,8 @@ const Footer = () => (
         </div>
       </div>
     </div>
-  </footer>
-);
+    </footer>
+  );
+};
 
 export default Footer;

@@ -16,6 +16,7 @@ import { useState, useEffect } from "react";
 import { adminFetch } from "@/lib/api-client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface Category {
   _id: string;
@@ -29,6 +30,7 @@ interface Product {
 }
 
 const Contact = () => {
+  const t = useTranslations("Contact");
   const { toast } = useToast();
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -95,11 +97,11 @@ const Contact = () => {
         body: JSON.stringify(formData),
       });
 
-      if (!res.ok) throw new Error("Failed to send inquiry");
+      if (!res.ok) throw new Error(t("errorTitle"));
 
       toast({
-        title: "Inquiry Sent!",
-        description: "We have received your message and will get back to you soon.",
+        title: t("successTitle"),
+        description: t("successDesc"),
       });
 
       setFormData({
@@ -114,7 +116,7 @@ const Contact = () => {
       });
     } catch (err: any) {
       toast({
-        title: "Submission Failed",
+        title: t("errorTitle"),
         description: err.message,
         variant: "destructive",
       });
@@ -139,13 +141,13 @@ const Contact = () => {
         <SectionReveal>
           <div className="max-w-3xl mx-auto text-center mb-8">
             <p className="text-primary uppercase tracking-[0.3em] text-sm mb-4 font-bold">
-              Get In Touch
+              {t("getInTouch")}
             </p>
             <h1 className="font-display text-5xl sm:text-6xl font-black mb-6 text-foreground">
-              Contact Us
+              {t("contactUs")}
             </h1>
             <p className="text-muted-foreground text-xl leading-relaxed max-w-2xl mx-auto">
-              We are here to assist you. Reach out for any inquiries, support, or partnership opportunities and our team will get back to you promptly.
+              {t("description")}
             </p>
           </div>
         </SectionReveal>
@@ -156,18 +158,18 @@ const Contact = () => {
         <SectionReveal className="h-full">
           <div className="flex flex-col h-full justify-between gap-8">
             <div className="space-y-6">
-              <h2 className="font-display text-2xl font-bold mb-6">Contact Information</h2>
+              <h2 className="font-display text-2xl font-bold mb-6">{t("infoTitle")}</h2>
               {[
                 {
                   icon: MapPin,
-                  label: "Address",
+                  label: t("addressLabel"),
                   value: "Industrial Estate, Sialkot 51310, Pakistan",
                 },
-                { icon: Phone, label: "Phone", value: "+92 52 1234567" },
-                { icon: Mail, label: "Email", value: "info@tecnoinstruments.com" },
+                { icon: Phone, label: t("phoneInfoLabel"), value: "+92 52 1234567" },
+                { icon: Mail, label: t("emailInfoLabel"), value: "info@tecnoinstruments.com" },
                 {
                   icon: Clock,
-                  label: "Hours",
+                  label: t("hoursLabel"),
                   value: "Mon–Sat, 9:00 AM – 6:00 PM (PKT)",
                 },
               ].map((c, i) => (
@@ -184,9 +186,9 @@ const Contact = () => {
             </div>
 
             <div className="p-8 glass-card shadow-sm border-t-4 border-t-primary/80 flex flex-col justify-center">
-              <h3 className="font-display font-bold text-xl mb-3 text-foreground">Connect With Us</h3>
+              <h3 className="font-display font-bold text-xl mb-3 text-foreground">{t("connectTitle")}</h3>
               <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
-                Follow our official channels to stay updated on our latest medical instrument innovations and company news.
+                {t("connectDesc")}
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <a href="https://www.linkedin.com/" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2.5 p-3 rounded-xl border border-border/50 bg-secondary hover:bg-[#0A66C2]/10 hover:border-[#0A66C2]/30 hover:text-[#0A66C2] transition-all group">
@@ -212,13 +214,13 @@ const Contact = () => {
             className="glass-card p-8 shadow-xl h-full flex flex-col"
           >
             <h2 className="font-display text-2xl font-bold mb-8">
-              Send a Message
+              {t("formTitle")}
             </h2>
             
             <div className="flex flex-col gap-7">
               <div className="relative">
                 <label className="absolute -top-2.5 left-3 px-1 bg-[#F6F5F4CC] text-xs font-bold text-muted-foreground z-10 backdrop-blur-sm rounded">
-                  Your Name *
+                  {t("nameLabel")}
                 </label>
                 <input
                   required
@@ -231,7 +233,7 @@ const Contact = () => {
 
               <div className="relative">
                 <label className="absolute -top-2.5 left-3 px-1 bg-[#F6F5F4CC] text-xs font-bold text-muted-foreground z-10 backdrop-blur-sm rounded">
-                  Email *
+                  {t("emailLabel")}
                 </label>
                 <input
                   required
@@ -245,7 +247,7 @@ const Contact = () => {
 
               <div className="relative">
                 <label className="absolute -top-2.5 left-3 px-1 bg-[#F6F5F4CC] text-xs font-bold text-muted-foreground z-10 backdrop-blur-sm rounded">
-                  Phone Number *
+                  {t("phoneLabel")}
                 </label>
                 <input
                   required
@@ -259,7 +261,7 @@ const Contact = () => {
 
               <div className="relative">
                 <label className="absolute -top-2.5 left-3 px-1 bg-[#F6F5F4CC] text-xs font-bold text-muted-foreground z-10 backdrop-blur-sm rounded">
-                  Company Name
+                  {t("companyLabel")}
                 </label>
                 <input
                   className="w-full px-4 py-3 rounded-lg bg-transparent border-2 border-border text-foreground text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary relative z-0 placeholder-transparent"
@@ -271,7 +273,7 @@ const Contact = () => {
 
               <div className="relative">
                 <label className="absolute -top-2.5 left-3 px-1 bg-[#F6F5F4CC] text-xs font-bold text-muted-foreground z-10 backdrop-blur-sm rounded">
-                  Country *
+                  {t("countryLabel")}
                 </label>
                 <Select 
                   required 
@@ -279,7 +281,7 @@ const Contact = () => {
                   onValueChange={(val) => setFormData(prev => ({ ...prev, country: val }))}
                 >
                   <SelectTrigger className="w-full px-4 py-[11px] min-h-[46px] rounded-lg bg-transparent border-2 border-border text-foreground text-sm focus:ring-1 focus:ring-primary focus:border-primary relative z-0 appearance-none">
-                    <SelectValue placeholder={<span className="text-muted-foreground">Select Country</span>} />
+                    <SelectValue placeholder={<span className="text-muted-foreground">{t("selectCountry")}</span>} />
                   </SelectTrigger>
                   <SelectContent className="bg-white z-50 max-h-80">
                     {countries.filter((c) => c.code !== "").map((c) => (
@@ -300,7 +302,7 @@ const Contact = () => {
 
               <div className="relative">
                 <label className="absolute -top-2.5 left-3 px-1 bg-[#F6F5F4CC] text-xs font-bold text-muted-foreground z-10 backdrop-blur-sm rounded">
-                  Category *
+                  {t("categoryLabel")}
                 </label>
                 <Select 
                   required 
@@ -308,7 +310,7 @@ const Contact = () => {
                   onValueChange={(val) => setFormData(prev => ({ ...prev, catagory: val }))}
                 >
                   <SelectTrigger className="w-full px-4 py-[11px] min-h-[46px] rounded-lg bg-transparent border-2 border-border text-foreground text-sm focus:ring-1 focus:ring-primary focus:border-primary relative z-0 appearance-none">
-                    <SelectValue placeholder={<span className="text-muted-foreground">Select Category</span>} />
+                    <SelectValue placeholder={<span className="text-muted-foreground">{t("selectCategory")}</span>} />
                   </SelectTrigger>
                   <SelectContent className="bg-white z-50 max-h-80">
                     {categories.map((c) => (
@@ -322,7 +324,7 @@ const Contact = () => {
 
               <div className="relative">
                 <label className="absolute -top-2.5 left-3 px-1 bg-[#F6F5F4CC] text-xs font-bold text-muted-foreground z-10 backdrop-blur-sm rounded">
-                  Product *
+                  {t("productLabel")}
                 </label>
                 <Select 
                   required 
@@ -331,7 +333,7 @@ const Contact = () => {
                   disabled={!formData.catagory}
                 >
                   <SelectTrigger className="w-full px-4 py-[11px] min-h-[46px] rounded-lg bg-transparent border-2 border-border text-foreground text-sm focus:ring-1 focus:ring-primary focus:border-primary relative z-0 appearance-none">
-                    <SelectValue placeholder={<span className="text-muted-foreground">Select Product</span>} />
+                    <SelectValue placeholder={<span className="text-muted-foreground">{t("selectProduct")}</span>} />
                   </SelectTrigger>
                   <SelectContent className="bg-white z-50 max-h-80">
                     {filteredProducts.map((p) => (
@@ -345,7 +347,7 @@ const Contact = () => {
 
               <div className="relative">
                 <label className="absolute -top-2.5 left-3 px-1 bg-[#F6F5F4CC] text-xs font-bold text-muted-foreground z-10 backdrop-blur-sm rounded">
-                  Message *
+                  {t("messageLabel")}
                 </label>
                 <textarea
                   required
@@ -366,10 +368,10 @@ const Contact = () => {
               {isSubmitting ? (
                 <div className="flex items-center justify-center gap-2">
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  Sending...
+                  {t("sending")}
                 </div>
               ) : (
-                "Send Message"
+                t("sendMessage")
               )}
             </button>
           </form>

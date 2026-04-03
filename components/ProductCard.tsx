@@ -1,10 +1,15 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useTranslations, useLocale } from "next-intl";
 import { Product } from "@/data/products";
 import { ArrowRight } from "lucide-react";
 
-const ProductCard = ({ product }: { product: Product }) => (
-  <Link href={`/product/${product.slug}`} className="group block">
+const ProductCard = ({ product }: { product: Product }) => {
+  const t = useTranslations("Products");
+  const locale = useLocale();
+
+  return (
+    <Link href={`/${locale}/products/${product.slug}`} className="group block">
     <motion.div
       whileHover={{ y: -6 }}
       transition={{ duration: 0.3, ease: "easeOut" }}
@@ -34,12 +39,13 @@ const ProductCard = ({ product }: { product: Product }) => (
             {product.material}
           </span>
           <span className="text-primary text-xs font-medium inline-flex items-center gap-1 group-hover:gap-2 transition-all">
-            Details <ArrowRight className="w-3 h-3" />
+            {t("details")} <ArrowRight className="w-3 h-3" />
           </span>
         </div>
       </div>
     </motion.div>
-  </Link>
-);
+    </Link>
+  );
+};
 
 export default ProductCard;

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
 import { Suspense } from "react";
 import { Check, ArrowLeft, ArrowRight } from "lucide-react";
@@ -107,6 +108,7 @@ const allProducts = [
 ];
 
 const ProductDetail = () => {
+  const t = useTranslations("Products");
   const params = useParams();
   const slug = params.slug as string;
 
@@ -116,10 +118,10 @@ const ProductDetail = () => {
     return (
       <div className="section-container pt-28 pb-20 text-center">
         <h1 className="font-display text-3xl font-bold mb-4">
-          Product Not Found
+          {t("notFoundTitle")}
         </h1>
-        <Link href="/products" className="text-primary hover:underline">
-          ← Back to Products
+        <Link href={`/${params.locale}/products`} className="text-primary hover:underline">
+          ← {t("backToProducts")}
         </Link>
       </div>
     );
@@ -129,10 +131,10 @@ const ProductDetail = () => {
     <div className="pt-24 pb-20">
       <div className="section-container">
         <Link
-          href={`/products/${product.categorySlug}`}
+          href={`/${params.locale}/products/catagory?category=${product.categorySlug}`}
           className="text-muted-foreground text-sm hover:text-primary inline-flex items-center gap-1 mb-8 transition-colors"
         >
-          <ArrowLeft className="w-3 h-3" /> Back to {product.category}
+          <ArrowLeft className="w-3 h-3" /> {t("backTo")} {product.category}
         </Link>
 
         <div className="grid lg:grid-cols-2 gap-16">
@@ -152,7 +154,7 @@ const ProductDetail = () => {
             <div className="mt-6 glass-card rounded-2xl overflow-hidden">
               <div className="p-4 border-b border-border/10">
                 <p className="text-xs uppercase tracking-[0.2em] text-primary font-medium">
-                  Interactive 3D Preview
+                  {t("threeDPreview")}
                 </p>
               </div>
               <Suspense
@@ -186,7 +188,7 @@ const ProductDetail = () => {
 
             <div className="glass-card p-6 mb-6 rounded-xl">
               <h3 className="font-display font-semibold text-xs uppercase tracking-[0.2em] mb-3 text-muted-foreground">
-                Material
+                {t("materialLabel")}
               </h3>
               <p className="text-foreground font-display font-semibold text-lg">
                 {product.material}
@@ -195,7 +197,7 @@ const ProductDetail = () => {
 
             <div className="glass-card p-6 mb-8 rounded-xl">
               <h3 className="font-display font-semibold text-xs uppercase tracking-[0.2em] mb-4 text-muted-foreground">
-                Features
+                {t("featuresLabel")}
               </h3>
               <ul className="space-y-3">
                 {product.features.map((f, idx) => (
@@ -213,10 +215,10 @@ const ProductDetail = () => {
             </div>
 
             <Link
-              href={`/inquiry?product=${encodeURIComponent(product.name)}`}
+              href={`/${params.locale}/inquiry?product=${encodeURIComponent(product.name)}`}
               className="gradient-button px-10 py-4 text-base inline-flex items-center gap-2 group"
             >
-              Send Inquiry
+              {t("sendInquiry")}
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
           </motion.div>

@@ -1,7 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { motion } from "framer-motion";
+import { Link } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 import { useState, useRef, Suspense, useEffect } from "react";
 import {
   ScrollReveal,
@@ -118,6 +119,8 @@ const heroSlides = [
 const infiniteSlides = [...heroSlides, ...heroSlides];
 
 const Index = () => {
+  const t = useTranslations("Home");
+  const navT = useTranslations("Navbar");
   const [videoEnded, setVideoEnded] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -226,13 +229,13 @@ const Index = () => {
         <div className="section-container text-center mb-4">
           <TextReveal>
             <p className="text-primary uppercase tracking-[0.3em] text-sm mb-1">
-              Interactive
+              {t("interactive")}
             </p>
             <h2 className="font-display font-outfit text-xl sm:text-2xl text-black font-black mb-1">
-              Explore in <span className="gradient-text">3D</span>
+              {t("threeDTitle")}
             </h2>
             <p className="text-black max-w-md mx-auto">
-              Rotate and examine our surgical instruments in real-time.
+              {t("threeDDescription")}
             </p>
           </TextReveal>
         </div>
@@ -254,17 +257,16 @@ const Index = () => {
             <TextReveal>
               <div>
                 <p className="text-primary uppercase tracking-[0.3em] text-[10px] mb-2">
-                  Innovation
+                  {t("innovation")}
                 </p>
                 <h2 className="font-display font-outfit text-xl text-black sm:text-2xl font-black leading-tight mb-3">
-                  Nylon-Coated <span className="gradient-text">Precision</span>
+                  {t("nylonTitle")}
                 </h2>
                 <p className="text-black leading-relaxed mb-2">
-                  Our proprietary nylon coating technology provides superior
-                  grip, reduced hand fatigue, and enhanced instrument longevity.
+                  {t("nylonDesc1")}
                 </p>
                 <p className="text-black leading-relaxed">
-                  Every coating is tested to withstand 500+ autoclave cycles.
+                  {t("nylonDesc2")}
                 </p>
               </div>
             </TextReveal>
@@ -316,10 +318,10 @@ const Index = () => {
           <TextReveal>
             <div className="text-center mb-6">
               <p className="text-primary uppercase tracking-[0.3em] text-[10px] mb-1">
-                Browse
+                {t("categoriesTitle")}
               </p>
               <h2 className="font-display text-xl sm:text-2xl font-black">
-                Product Categories
+                {t("categoriesSubtitle")}
               </h2>
             </div>
           </TextReveal>
@@ -358,10 +360,10 @@ const Index = () => {
           <TextReveal>
             <div className="text-center mb-10">
               <p className="text-primary uppercase tracking-[0.3em] text-[10px] mb-1">
-                Events
+                {t("exhibitionTitle")}
               </p>
               <h2 className="font-display text-xl sm:text-2xl font-black">
-                Our Exhibition
+                {t("exhibitionSubtitle")}
               </h2>
             </div>
           </TextReveal>
@@ -377,23 +379,21 @@ const Index = () => {
             <div className="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
               <ScrollReveal>
                 <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary text-xs font-semibold rounded-full mb-4">
-                  <Globe className="w-3.5 h-3.5" /> Upcoming Event
+                  <Globe className="w-3.5 h-3.5" /> {t("upcomingEvent")}
                 </div>
-                <h3 className="text-2xl font-bold font-display mb-3">Global Medical Summit 2026</h3>
+                <h3 className="text-2xl font-bold font-display mb-3">{t("exhibitionEvent")}</h3>
                 <p className="text-muted-foreground mb-4">
-                  Join us at the largest international gathering of medical professionals and
-                  surgical instrument innovators. Discover our latest nylon-coated
-                  instruments and precision innovations in person.
+                  {t("exhibitionDesc")}
                 </p>
                 <div className="flex items-center gap-2 text-sm font-medium text-foreground mb-8">
-                  <span className="bg-muted px-2.5 py-1 rounded">Date:</span>
+                  <span className="bg-muted px-2.5 py-1 rounded">{t("date")}:</span>
                   <span>1/2/2026</span>
                 </div>
                 <Link
                   href="/events"
                   className="gradient-button w-fit px-6 py-2.5 text-sm inline-flex items-center gap-2"
                 >
-                  View All <ArrowRight className="w-3.5 h-3.5" />
+                  {t("viewAll")} <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </ScrollReveal>
             </div>
@@ -406,10 +406,10 @@ const Index = () => {
         <TextReveal>
           <div className="text-center mb-6">
             <p className="text-primary uppercase tracking-[0.3em] text-[10px] mb-1">
-              Featured
+              {t("featured")}
             </p>
             <h2 className="font-display text-xl sm:text-2xl font-black">
-              Best Sellers
+              {t("bestSellers")}
             </h2>
           </div>
         </TextReveal>
@@ -447,7 +447,7 @@ const Index = () => {
                         {p.material}
                       </span>
                       <span className="text-primary text-xs font-medium inline-flex items-center gap-1 group-hover:gap-2 transition-all">
-                        Details <ArrowRight className="w-3 h-3" />
+                        {t("details")} <ArrowRight className="w-3 h-3" />
                       </span>
                     </div>
                   </div>
@@ -462,7 +462,7 @@ const Index = () => {
             href="/products"
             className="gradient-button px-6 py-2.5 text-sm inline-flex items-center gap-2"
           >
-            View all Products
+            {t("viewAllProducts")}
             <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
@@ -480,25 +480,23 @@ const Index = () => {
               <div className="absolute inset-0 border border-primary/10 rounded-2xl" />
               <div className="relative">
                 <h2 className="font-display text-xl sm:text-2xl font-black mb-2">
-                  Ready to Partner With Us?
+                  {t("ctaTitle")}
                 </h2>
                 <p className="text-muted-foreground max-w-lg mx-auto mb-5 text-xs">
-                  Whether you need a single prototype or bulk orders, our team
-                  delivers precision instruments tailored to your
-                  specifications.
+                  {t("ctaDesc")}
                 </p>
                 <div className="flex flex-wrap justify-center gap-3">
                   <Link
                     href="/inquiry"
                     className="gradient-button px-6 py-2.5 text-sm inline-flex items-center gap-2"
                   >
-                    Send Inquiry <ArrowRight className="w-3.5 h-3.5" />
+                    {t("sendInquiry")} <ArrowRight className="w-3.5 h-3.5" />
                   </Link>
                   <Link
                     href="/contact"
                     className="px-6 py-2.5 text-sm font-semibold rounded-lg border border-border text-foreground hover:bg-muted transition-all"
                   >
-                    Contact Us
+                    {t("contactUs")}
                   </Link>
                 </div>
               </div>
@@ -514,7 +512,7 @@ const Index = () => {
         style={{ animationDuration: "3s" }}
       >
         <MessageCircle className="w-4 h-4" />
-        Inquire Us
+        {t("inquireUs")}
       </Link>
     </div>
   );

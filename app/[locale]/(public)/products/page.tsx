@@ -1,17 +1,19 @@
 "use client";
 
-import Link from "next/link";
 import {
   TextReveal,
   StaggerContainer,
   StaggerItem,
 } from "@/components/ScrollReveal";
+import { Link } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 
 import { categories } from "@/data/products";
 
 const Products = () => {
+  const t = useTranslations("Products");
   return (
-    <div className="pb-20">
+    <div className="pb-20 text-black">
       {/* Complete Height Looping Video */}
       <section className="w-full mb-16">
         <video
@@ -28,14 +30,13 @@ const Products = () => {
       <div className="section-container mb-16 text-center flex flex-col items-center">
         <TextReveal>
           <p className="text-primary uppercase tracking-[0.3em] text-xs mb-4 font-bold">
-            BROWSE
+            {t("badge")}
           </p>
           <h1 className="font-display text-5xl sm:text-6xl font-black mb-6 text-foreground">
-            Our Categories
+            {t("title")}
           </h1>
           <p className="text-muted-foreground max-w-xl mx-auto text-lg">
-            Browse our complete range of surgical, dental, and beauty
-            instruments by category.
+            {t("subtitle")}
           </p>
         </TextReveal>
       </div>
@@ -63,7 +64,7 @@ const Products = () => {
                     {cat.description}
                   </p>
                   <p className="text-xs text-primary font-medium">
-                    {cat.productCount} instruments →
+                    {cat.productCount} {t("viewSuffix")}
                   </p>
                 </div>
               </Link>

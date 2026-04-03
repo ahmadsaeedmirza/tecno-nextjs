@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import {
   TextReveal,
   StaggerContainer,
@@ -105,8 +106,10 @@ const allProducts = [
 ];
 
 const ProductCategory = () => {
+  const t = useTranslations("Products");
   const params = useParams();
-  const categorySlug = params.category as string;
+  const searchParams = useSearchParams();
+  const categorySlug = searchParams.get("category") || "";
 
   const category = categories.find((c) => c.slug === categorySlug);
   const products = allProducts.filter((p) => p.categorySlug === categorySlug);
@@ -115,10 +118,10 @@ const ProductCategory = () => {
     return (
       <div className="section-container pt-28 pb-20 text-center">
         <h1 className="font-display text-3xl font-bold mb-4">
-          Category Not Found
+          {t("catNotFoundTitle")}
         </h1>
-        <Link href="/products" className="text-primary hover:underline">
-          ← Back to Products
+        <Link href={`/${params.locale}/products`} className="text-primary hover:underline">
+          ← {t("backToProducts")}
         </Link>
       </div>
     );
@@ -129,10 +132,10 @@ const ProductCategory = () => {
       <div className="section-container">
         <TextReveal>
           <Link
-            href="/products"
+            href={`/${params.locale}/products`}
             className="text-primary text-sm hover:underline mb-6 inline-block"
           >
-            ← All Categories
+            ← {t("backToCategories")}
           </Link>
           <h1 className="font-display text-4xl sm:text-5xl font-black mb-2">
             {category.name}
@@ -152,7 +155,7 @@ const ProductCategory = () => {
 
         {products.length === 0 && (
           <p className="text-center text-muted-foreground py-20">
-            No products in this category yet.
+            {t("noProducts")}
           </p>
         )}
       </div>

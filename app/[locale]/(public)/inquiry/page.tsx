@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import SectionReveal from "@/components/SectionReveal";
 import { AlertTriangle, CheckCircle } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 const RECAPTCHA_SITE_KEY = "";
 
@@ -20,6 +21,7 @@ const products = [
 ];
 
 const Inquiry = () => {
+  const t = useTranslations("Inquiry");
   const searchParams = useSearchParams();
   const preselected = searchParams.get("product") || "";
   const [submitted, setSubmitted] = useState(false);
@@ -71,10 +73,10 @@ const Inquiry = () => {
       <div className="section-container py-20 text-center">
         <CheckCircle className="w-16 h-16 text-primary mx-auto mb-4" />
         <h1 className="font-display text-3xl font-bold mb-2">
-          Inquiry Submitted!
+          {t("successTitle")}
         </h1>
         <p className="text-muted-foreground">
-          Thank you. Our team will get back to you within 24-48 hours.
+          {t("successDesc")}
         </p>
       </div>
     );
@@ -87,9 +89,9 @@ const Inquiry = () => {
     <div className="section-container pt-24 pb-12 max-w-3xl">
       <SectionReveal>
         <p className="text-primary uppercase tracking-widest text-sm mb-2">
-          Request a Quote
+          {t("badge")}
         </p>
-        <h1 className="font-display text-4xl font-bold mb-8">Inquiry Form</h1>
+        <h1 className="font-display text-4xl font-bold mb-8">{t("title")}</h1>
       </SectionReveal>
 
       {!RECAPTCHA_SITE_KEY && (
@@ -100,11 +102,11 @@ const Inquiry = () => {
       )}
 
       <form onSubmit={handleSubmit} className="glass-card p-8 space-y-5">
-        <h2 className="font-display text-lg font-bold">Company Details</h2>
+        <h2 className="font-display text-lg font-bold">{t("sectionCompany")}</h2>
         <div className="grid sm:grid-cols-2 gap-4">
           <input
             required
-            placeholder="Company Name *"
+            placeholder={t("companyPlaceholder")}
             value={form.company}
             onChange={(e) =>
               setForm((f) => ({ ...f, company: e.target.value }))
@@ -113,7 +115,7 @@ const Inquiry = () => {
           />
           <input
             required
-            placeholder="Contact Person *"
+            placeholder={t("contactPlaceholder")}
             value={form.contact}
             onChange={(e) =>
               setForm((f) => ({ ...f, contact: e.target.value }))
@@ -123,21 +125,21 @@ const Inquiry = () => {
           <input
             required
             type="email"
-            placeholder="Email *"
+            placeholder={t("emailPlaceholder")}
             value={form.email}
             onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
             className={inputClass}
           />
           <input
             required
-            placeholder="Phone *"
+            placeholder={t("phonePlaceholder")}
             value={form.phone}
             onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
             className={inputClass}
           />
           <input
             required
-            placeholder="Country *"
+            placeholder={t("countryPlaceholder")}
             value={form.country}
             onChange={(e) =>
               setForm((f) => ({ ...f, country: e.target.value }))
@@ -146,21 +148,21 @@ const Inquiry = () => {
           />
           <input
             required
-            placeholder="City *"
+            placeholder={t("cityPlaceholder")}
             value={form.city}
             onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
             className={inputClass}
           />
         </div>
         <input
-          placeholder="Website (optional)"
+          placeholder={t("websitePlaceholder")}
           value={form.website}
           onChange={(e) => setForm((f) => ({ ...f, website: e.target.value }))}
           className={inputClass}
         />
 
         <h2 className="font-display text-lg font-bold pt-4">
-          Select Products *
+          {t("sectionProducts")}
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-60 overflow-y-auto pr-2">
           {products.map((p) => (
@@ -180,12 +182,12 @@ const Inquiry = () => {
         </div>
 
         <h2 className="font-display text-lg font-bold pt-4">
-          Additional Details
+          {t("sectionDetails")}
         </h2>
         <textarea
           required
           rows={4}
-          placeholder="Describe your requirements, quantities, specifications... *"
+          placeholder={t("detailsPlaceholder")}
           value={form.details}
           onChange={(e) => setForm((f) => ({ ...f, details: e.target.value }))}
           className={`${inputClass} resize-none`}
@@ -199,8 +201,7 @@ const Inquiry = () => {
             className="accent-primary mt-0.5"
           />
           <span>
-            I consent to TECNO Instruments processing my data for the purpose of
-            this inquiry. *
+            {t("consentLabel")}
           </span>
         </label>
 
@@ -209,7 +210,7 @@ const Inquiry = () => {
           disabled={!isFormValid}
           className="gradient-button px-8 py-3 text-base w-full disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Submit Inquiry
+          {t("submitBtn")}
         </button>
       </form>
     </div>

@@ -4,6 +4,7 @@ import { useState } from "react";
 import SectionReveal from "@/components/SectionReveal";
 import { CheckCircle, Star } from "lucide-react";
 import ReCAPTCHA from "react-google-recaptcha";
+import { useTranslations } from "next-intl";
 import {
   Select,
   SelectContent,
@@ -13,16 +14,18 @@ import {
 } from "@/components/ui/select";
 import { countries } from "@/data/countries";
 
-const ratingQuestions = [
-  { key: "quality", label: "*How do you rate the quality of our products:" },
-  { key: "packaging", label: "*How do you rate the packaging of our products:" },
-  { key: "reliability", label: "*How do you rate the reliability of our products:" },
-  { key: "onTime", label: "*Did you receive our products on time:" },
-  { key: "shortage", label: "*Did you find any shortage in Quantity:" },
-  { key: "damaged", label: "*Did you find any damaged products:" },
+const getRatingQuestions = (t: any) => [
+  { key: "quality", label: t("questions.quality") },
+  { key: "packaging", label: t("questions.packaging") },
+  { key: "reliability", label: t("questions.reliability") },
+  { key: "onTime", label: t("questions.onTime") },
+  { key: "shortage", label: t("questions.shortage") },
+  { key: "damaged", label: t("questions.damaged") },
 ];
 
 const Feedback = () => {
+  const t = useTranslations("Feedback");
+  const ratingQuestions = getRatingQuestions(t);
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
@@ -46,9 +49,9 @@ const Feedback = () => {
     return (
       <div className="section-container py-20 text-center">
         <CheckCircle className="w-16 h-16 text-primary mx-auto mb-4" />
-        <h1 className="font-display text-3xl font-bold mb-2">Thank You!</h1>
+        <h1 className="font-display text-3xl font-bold mb-2">{t("successTitle")}</h1>
         <p className="text-muted-foreground">
-          Your feedback has been received.
+          {t("successDesc")}
         </p>
       </div>
     );
@@ -105,13 +108,13 @@ const Feedback = () => {
         <SectionReveal>
           <div className="max-w-3xl mx-auto text-center mb-8">
             <p className="text-primary uppercase tracking-[0.3em] text-sm mb-4 font-bold">
-              We Value Your Input
+              {t("badge")}
             </p>
             <h1 className="font-display text-5xl sm:text-6xl font-black mb-6 text-foreground">
-              Feedback
+              {t("title")}
             </h1>
             <p className="text-muted-foreground text-xl leading-relaxed max-w-2xl mx-auto">
-              Your insights help us maintain our rigorous standards of excellence. We'd love to hear about your experience with our surgical instruments and services.
+              {t("subtitle")}
             </p>
           </div>
         </SectionReveal>
@@ -126,7 +129,7 @@ const Feedback = () => {
         <div className="flex flex-col gap-8 pt-2">
           <div className="relative">
             <label className="absolute -top-2.5 left-3 px-1 bg-[#F6F5F4CC] text-xs font-bold text-muted-foreground z-10 backdrop-blur-sm rounded">
-              Your Name *
+              {t("nameLabel")}
             </label>
             <input
               required
@@ -140,7 +143,7 @@ const Feedback = () => {
 
           <div className="relative">
             <label className="absolute -top-2.5 left-3 px-1 bg-[#F6F5F4CC] text-xs font-bold text-muted-foreground z-10 backdrop-blur-sm rounded">
-              Email *
+              {t("emailLabel")}
             </label>
             <input
               required
@@ -155,7 +158,7 @@ const Feedback = () => {
 
           <div className="relative">
             <label className="absolute -top-2.5 left-3 px-1 bg-[#F6F5F4CC] text-xs font-bold text-muted-foreground z-10 backdrop-blur-sm rounded">
-              Company Name
+              {t("companyLabel")}
             </label>
             <input
               name="companyName"
@@ -168,14 +171,14 @@ const Feedback = () => {
 
           <div className="relative">
             <label className="absolute -top-2.5 left-3 px-1 bg-[#F6F5F4CC] text-xs font-bold text-muted-foreground z-10 backdrop-blur-sm rounded">
-              Country *
+              {t("countryLabel")}
             </label>
             <Select 
               onValueChange={(val) => setFormData(prev => ({ ...prev, country: val }))}
               required
             >
               <SelectTrigger className="w-full px-4 py-[11px] min-h-[46px] rounded-lg bg-transparent border-2 border-border text-foreground text-sm focus:ring-1 focus:ring-primary focus:border-primary relative z-0 appearance-none">
-                <SelectValue placeholder={<span className="text-muted-foreground">Select Country</span>} />
+                <SelectValue placeholder={<span className="text-muted-foreground">{t("selectCountry")}</span>} />
               </SelectTrigger>
               <SelectContent className="bg-white z-50 max-h-80">
                 {countries.filter((c) => c.code !== "").map((c) => (
@@ -196,7 +199,7 @@ const Feedback = () => {
         </div>
 
         <div className="space-y-4 pt-6 border-t border-border mt-2">
-          <h3 className="font-bold text-lg mb-4">Please rate the following:</h3>
+          <h3 className="font-bold text-lg mb-4">{t("ratingTitle")}</h3>
           {ratingQuestions.map((q) => (
             <div key={q.key} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <p className="text-sm font-medium text-foreground">
@@ -224,7 +227,7 @@ const Feedback = () => {
         <div className="pt-6 border-t border-border">
           <div className="relative mt-2">
             <label className="absolute -top-2.5 left-3 px-1 bg-[#F6F5F4CC] text-xs font-bold text-muted-foreground z-10 backdrop-blur-sm rounded">
-              Your feedback *
+              {t("messageLabel")}
             </label>
             <textarea
               required
@@ -252,7 +255,7 @@ const Feedback = () => {
             disabled={!allRated || !isHuman || isSubmitting}
             className="gradient-button px-10 py-4 text-base font-bold w-full sm:w-auto min-w-[200px] disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl rounded-xl"
           >
-            {isSubmitting ? "Submitting..." : "Submit Feedback"}
+            {isSubmitting ? t("submittingBtn") : t("submitBtn")}
           </button>
         </div>
       </form>

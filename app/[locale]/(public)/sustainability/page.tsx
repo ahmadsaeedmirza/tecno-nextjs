@@ -2,40 +2,40 @@
 
 import { Leaf, Recycle, Droplet, Zap } from "lucide-react";
 import { StaggerContainer, StaggerItem } from "@/components/ScrollReveal";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 
-const initiatives = [
+const getInitiatives = (t: any) => [
   {
     icon: Leaf,
-    title: "Eco-Friendly Materials",
-    description:
-      "We source sustainable materials and minimize waste in our manufacturing processes, reducing our environmental footprint while maintaining the highest quality standards for surgical instruments.",
+    title: t("initiatives.materialsTitle"),
+    description: t("initiatives.materialsDesc"),
     image: "/images/sustainability/materials.png",
   },
   {
     icon: Recycle,
-    title: "Recyclable Packaging",
-    description:
-      "All our packaging materials are recyclable and biodegradable. We are committed to reducing plastic use and promoting circular economy principles throughout our supply chain.",
+    title: t("initiatives.packagingTitle"),
+    description: t("initiatives.packagingDesc"),
     image: "/images/sustainability/packaging.png",
   },
   {
     icon: Droplet,
-    title: "Water Conservation",
-    description:
-      "Our state-of-the-art manufacturing facilities incorporate advanced water recycling systems, reducing consumption by 40% compared to industry standards and protecting this vital resource.",
+    title: t("initiatives.waterTitle"),
+    description: t("initiatives.waterDesc"),
     image: "/images/sustainability/water.png",
   },
   {
     icon: Zap,
-    title: "Solar Energy",
-    description:
-      "We have invested in renewable energy infrastructure, with solar panels powering 60% of our manufacturing operations, significantly reducing our carbon footprint.",
+    title: t("initiatives.solarTitle"),
+    description: t("initiatives.solarDesc"),
     image: "/images/sustainability/solar.png",
   },
 ];
 
 export default function SustainabilityPage() {
+  const t = useTranslations("Sustainability");
+  const initiatives = getInitiatives(t);
+
   return (
     <div className="min-h-screen bg-white text-black overflow-hidden">
       {/* Full-width Hero Image */}
@@ -52,14 +52,13 @@ export default function SustainabilityPage() {
           <StaggerItem>
             <div className="max-w-3xl mx-auto text-center mb-8">
               <p className="text-primary uppercase tracking-[0.3em] text-sm mb-4 font-bold">
-                ECO-FRIENDLY
+                {t("badge")}
               </p>
               <h1 className="font-display text-5xl sm:text-6xl font-black mb-6 text-foreground">
-                Sustainability
+                {t("title")}
               </h1>
               <p className="text-muted-foreground text-xl leading-relaxed">
-                Our commitment to environmental responsibility and sustainable
-                manufacturing practices
+                {t("subtitle")}
               </p>
             </div>
           </StaggerItem>
@@ -75,7 +74,6 @@ export default function SustainabilityPage() {
             return (
               <StaggerContainer key={index} staggerChildren={0.2} delayChildren={0.1}>
                 <div className={`flex flex-col md:flex-row items-stretch gap-10 ${isEven ? "" : "md:flex-row-reverse"}`}>
-
                   {/* Text Half */}
                   <StaggerItem className="w-full md:w-1/2 flex">
                     <div className="flex flex-col justify-center h-full w-full rounded-2xl group transition-all duration-300">
@@ -101,7 +99,6 @@ export default function SustainabilityPage() {
                       />
                     </div>
                   </StaggerItem>
-
                 </div>
               </StaggerContainer>
             );
@@ -113,15 +110,15 @@ export default function SustainabilityPage() {
       <section className="section-container py-16 border-t border-orange-500/20">
         <StaggerContainer staggerChildren={0.1} delayChildren={0.3}>
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-black">Our Impact</h2>
+            <h2 className="text-4xl font-bold text-black">{t("impactTitle")}</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 max-w-5xl mx-auto">
             {[
-              { value: "40%", label: "Water Reduction" },
-              { value: "60%", label: "Solar Powered" },
-              { value: "100%", label: "Recyclable Packaging" },
-              { value: "ISO 14001", label: "Certified" },
+              { value: "40%", label: t("stats.water") },
+              { value: "60%", label: t("stats.solar") },
+              { value: "100%", label: t("stats.packaging") },
+              { value: "ISO 14001", label: t("stats.certified") },
             ].map((stat, index) => (
               <StaggerItem key={index}>
                 <div className="relative p-6 rounded-2xl overflow-hidden text-center group">
@@ -150,13 +147,12 @@ export default function SustainabilityPage() {
             <div className="relative z-10 max-w-3xl mx-auto">
               <StaggerItem>
                 <h2 className="font-display text-4xl font-black font-bold mb-6 text-foreground">
-                  Join Our Mission
+                  {t("ctaTitle")}
                 </h2>
               </StaggerItem>
               <StaggerItem>
                 <p className="text-muted-foreground text-lg mb-10">
-                  To advance surgical excellence by providing cutting-edge electrosurgical instruments that enhance precision, safety, and
-                  efficiency—empowering medical professionals to deliver superior patient outcomes worldwide.
+                  {t("ctaDesc")}
                 </p>
               </StaggerItem>
               <StaggerItem>
@@ -165,13 +161,13 @@ export default function SustainabilityPage() {
                     href="/contact"
                     className="gradient-button px-8 py-3 rounded-lg font-semibold hover:shadow-lg transition-all"
                   >
-                    Get In Touch
+                    {t("ctaContact")}
                   </Link>
                   <Link
                     href="/products"
                     className="px-8 py-3 rounded-lg font-semibold border border-border text-foreground hover:bg-muted transition-all"
                   >
-                    Explore Products
+                    {t("ctaProducts")}
                   </Link>
                 </div>
               </StaggerItem>
