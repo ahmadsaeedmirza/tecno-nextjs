@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/routing";
 import {
   TextReveal,
   StaggerContainer,
@@ -120,7 +120,7 @@ const ProductCategory = () => {
         <h1 className="font-display text-3xl font-bold mb-4">
           {t("catNotFoundTitle")}
         </h1>
-        <Link href={`/${params.locale}/products`} className="text-primary hover:underline">
+        <Link href="/products" className="text-primary hover:underline">
           ← {t("backToProducts")}
         </Link>
       </div>
@@ -132,7 +132,7 @@ const ProductCategory = () => {
       <div className="section-container">
         <TextReveal>
           <Link
-            href={`/${params.locale}/products`}
+            href="/products"
             className="text-primary text-sm hover:underline mb-6 inline-block"
           >
             ← {t("backToCategories")}

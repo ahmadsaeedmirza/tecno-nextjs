@@ -63,14 +63,14 @@ const Technology = () => {
       <div className="section-container">
         <div className="grid sm:grid-cols-2 gap-6 mb-16">
           {techItems.map((item, i) => (
-            <SectionReveal key={i} delay={i * 0.1}>
-              <div className="glass-card overflow-hidden hover:border-primary/20 transition-all duration-500 rounded-2xl border border-border shadow-sm">
+            <SectionReveal key={i} delay={i * 0.1} className="h-full">
+              <div className="glass-card h-full overflow-hidden hover:border-primary/20 transition-all duration-500 rounded-2xl border border-border shadow-sm flex flex-col">
                 <img
                   src={item.image}
                   alt={item.title}
                   className="w-full h-48 object-cover"
                 />
-                <div className="p-6">
+                <div className="p-6 flex-1">
                   <item.icon className="w-8 h-8 text-primary mb-3" />
                   <h3 className="font-display text-lg font-bold mb-2">
                     {item.title}

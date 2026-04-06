@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { ArrowRight, Home } from "lucide-react";
 import { useEffect } from "react";
+import { Link } from "@/i18n/routing";
 
 export default function NotFound() {
   useEffect(() => {

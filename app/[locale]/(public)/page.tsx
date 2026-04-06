@@ -294,8 +294,8 @@ const Index = () => {
                   desc: "Lifetime warranty",
                 },
               ].map((item, i) => (
-                <StaggerItem key={i}>
-                  <div className="glass-card p-3 text-center group hover:border-primary/30 transition-all duration-500">
+                <StaggerItem key={i} className="h-full">
+                  <div className="glass-card h-full p-3 text-center group hover:border-primary/30 transition-all duration-500 flex flex-col justify-center">
                     <item.icon className="w-6 h-6 text-primary mx-auto mb-1.5 group-hover:scale-110 transition-transform" />
                     <h3 className="font-display text-lg text-black font-semibold mb-0.5">
                       {item.title}

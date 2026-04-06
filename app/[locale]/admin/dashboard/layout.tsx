@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { Link, useRouter, usePathname } from "@/i18n/routing";
 import { 
   LayoutDashboard, 
   Package, 

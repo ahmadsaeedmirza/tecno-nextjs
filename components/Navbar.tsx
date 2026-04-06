@@ -1,11 +1,10 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import Link from "next/link";
 import { Menu, X, Search, ChevronDown, Globe } from "lucide-react";
 import { categories } from "@/data/products";
 import { useTranslations, useLocale } from "next-intl";
-import { useRouter, usePathname } from "@/i18n/routing";
+import { Link, useRouter, usePathname } from "@/i18n/routing";
 
 const tecnoLogo = "/tecno-logo.webp";
 
@@ -209,7 +208,7 @@ const Navbar = () => {
 
       {/* Mobile menu */}
       {open && (
-        <div className="lg:hidden bg-background/95 backdrop-blur-2xl border-t border-border/20 pb-3">
+        <div className="lg:hidden bg-background/95 backdrop-blur-2xl border-t border-border/20 pb-6">
           <nav className="section-container flex flex-col gap-0.5 pt-2">
             {navLinks.map((l) => (
               <Link
@@ -224,6 +223,31 @@ const Navbar = () => {
                 {l.label}
               </Link>
             ))}
+            
+            {/* Mobile Language Selector */}
+            <div className="mt-4 pt-4 border-t border-border/20">
+              <p className="px-3 text-xs font-bold text-muted-foreground uppercase mb-2">
+                {t("language")}
+              </p>
+              <div className="grid grid-cols-2 gap-1 px-1">
+                {languages.map((lang) => (
+                  <button
+                    key={lang.code}
+                    onClick={() => {
+                      router.push(pathname, { locale: lang.code });
+                      setOpen(false);
+                    }}
+                    className={`flex items-center gap-2 px-3 py-2 text-sm font-bold rounded-md transition-colors ${locale === lang.code
+                      ? "text-primary bg-primary/5"
+                      : "text-foreground hover:text-primary hover:bg-muted"
+                      }`}
+                  >
+                    <span className="text-[10px] opacity-70">{lang.code.toUpperCase()}</span>
+                    {lang.label}
+                  </button>
+                ))}
+              </div>
+            </div>
           </nav>
         </div>
       )}

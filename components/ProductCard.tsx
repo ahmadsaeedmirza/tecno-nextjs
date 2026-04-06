@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { motion } from "framer-motion";
 import { useTranslations, useLocale } from "next-intl";
+import { Link } from "@/i18n/routing";
 import { Product } from "@/data/products";
 import { ArrowRight } from "lucide-react";
 
@@ -9,7 +9,7 @@ const ProductCard = ({ product }: { product: Product }) => {
   const locale = useLocale();
 
   return (
-    <Link href={`/${locale}/products/${product.slug}`} className="group block">
+    <Link href={`/products/${product.slug}`} className="group block">
     <motion.div
       whileHover={{ y: -6 }}
       transition={{ duration: 0.3, ease: "easeOut" }}

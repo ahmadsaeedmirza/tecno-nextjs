@@ -41,7 +41,7 @@ const feedbackSchema = new mongoose.Schema({
 });
 
 // Calculate averageRating before saving
-feedbackSchema.pre('save', function() {
+feedbackSchema.pre('save', function(next) {
     const ratings = [
         this.quality,
         this.packaging,
@@ -53,6 +53,7 @@ feedbackSchema.pre('save', function() {
     
     const sum = ratings.reduce((acc, rating) => acc + rating, 0);
     this.averageRating = Math.round((sum / ratings.length) * 10) / 10;
+    next();
 });
 
 const Feedback = mongoose.model('Feedback', feedbackSchema);

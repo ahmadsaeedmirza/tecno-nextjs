@@ -1,11 +1,11 @@
 "use client";
 
-import Link from "next/link";
 import { MapPin, Phone, Mail, Clock } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFacebookSquare, faInstagram, faLinkedin } from "@fortawesome/free-brands-svg-icons";
 
 import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/routing";
 
 const tecnoLogo = "/tecno-logo.webp";
 

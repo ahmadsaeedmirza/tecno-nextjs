@@ -8,12 +8,24 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: false,
     formats: ["image/avif", "image/webp"],
+    remotePatterns: [
+      {
+        protocol: "http",
+        hostname: "localhost",
+        port: "8000",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "**",
+      },
+    ],
   },
   webpack: (config) => {
     config.externals.push("canvas", "jsdom");
     return config;
   },
-  transpilePackages: ['three', '@react-three/fiber', '@react-three/drei'],
+  transpilePackages: ["three", "@react-three/fiber", "@react-three/drei"],
 };
 
 export default withNextIntl(nextConfig);

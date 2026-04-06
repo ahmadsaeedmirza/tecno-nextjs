@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/routing";
 import { motion } from "framer-motion";
 import { Suspense } from "react";
 import { Check, ArrowLeft, ArrowRight } from "lucide-react";
@@ -120,7 +120,7 @@ const ProductDetail = () => {
         <h1 className="font-display text-3xl font-bold mb-4">
           {t("notFoundTitle")}
         </h1>
-        <Link href={`/${params.locale}/products`} className="text-primary hover:underline">
+        <Link href="/products" className="text-primary hover:underline">
           ← {t("backToProducts")}
         </Link>
       </div>
@@ -131,7 +131,7 @@ const ProductDetail = () => {
     <div className="pt-24 pb-20">
       <div className="section-container">
         <Link
-          href={`/${params.locale}/products/catagory?category=${product.categorySlug}`}
+          href={`/products/catagory?category=${product.categorySlug}`}
           className="text-muted-foreground text-sm hover:text-primary inline-flex items-center gap-1 mb-8 transition-colors"
         >
           <ArrowLeft className="w-3 h-3" /> {t("backTo")} {product.category}
@@ -215,7 +215,7 @@ const ProductDetail = () => {
             </div>
 
             <Link
-              href={`/${params.locale}/inquiry?product=${encodeURIComponent(product.name)}`}
+              href={`/inquiry?product=${encodeURIComponent(product.name)}`}
               className="gradient-button px-10 py-4 text-base inline-flex items-center gap-2 group"
             >
               {t("sendInquiry")}
