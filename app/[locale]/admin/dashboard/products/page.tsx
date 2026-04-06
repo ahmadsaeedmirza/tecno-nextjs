@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
+import { encodeUrlPathSegments } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -35,6 +36,8 @@ interface Product {
   _id: string;
   name: string;
   code?: string;
+  tip?: string[];
+  size?: string[];
   description: string;
   isHidden: string;
   imageCover: string;
@@ -48,6 +51,7 @@ export default function AdminProductsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const { toast } = useToast();
@@ -58,8 +62,35 @@ export default function AdminProductsPage() {
     description: "",
     code: "",
     catagory: "",
+    tip: [] as string[],
+    size: [] as string[],
     imageCover: null as File | null,
   });
+
+  const addArrayItem = (key: "tip" | "size") => {
+    setFormData((prev) => ({
+      ...prev,
+      [key]: [...prev[key], ""],
+    }));
+  };
+
+  const updateArrayItem = (
+    key: "tip" | "size",
+    index: number,
+    value: string,
+  ) => {
+    setFormData((prev) => ({
+      ...prev,
+      [key]: prev[key].map((v, i) => (i === index ? value : v)),
+    }));
+  };
+
+  const removeArrayItem = (key: "tip" | "size", index: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      [key]: prev[key].filter((_, i) => i !== index),
+    }));
+  };
 
   const fetchInitialData = async () => {
     try {
@@ -95,6 +126,16 @@ export default function AdminProductsPage() {
       data.append("description", formData.description);
       if (formData.code) data.append("code", formData.code);
       if (formData.catagory) data.append("catagory", formData.catagory);
+
+      for (const tip of formData.tip) {
+        const trimmed = tip.trim();
+        if (trimmed) data.append("tip", trimmed);
+      }
+      for (const size of formData.size) {
+        const trimmed = size.trim();
+        if (trimmed) data.append("size", trimmed);
+      }
+
       if (formData.imageCover) data.append("imageCover", formData.imageCover);
 
       if (editingId) {
@@ -124,6 +165,8 @@ export default function AdminProductsPage() {
         description: "",
         code: "",
         catagory: "",
+        tip: [],
+        size: [],
         imageCover: null,
       });
       fetchInitialData();
@@ -145,6 +188,8 @@ export default function AdminProductsPage() {
       description: product.description || "",
       code: product.code || "",
       catagory: product.catagory?._id || "",
+      tip: product.tip || [],
+      size: product.size || [],
       imageCover: null,
     });
     setIsAddModalOpen(true);
@@ -159,6 +204,8 @@ export default function AdminProductsPage() {
         description: "",
         code: "",
         catagory: "",
+        tip: [],
+        size: [],
         imageCover: null,
       });
     }
@@ -206,11 +253,17 @@ export default function AdminProductsPage() {
     }
   };
 
-  const filteredProducts = products.filter(
-    (p) =>
+  const filteredProducts = products.filter((p) => {
+    const matchesSearch =
       p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.code?.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+      p.code?.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesCategory = selectedCategoryId
+      ? p.catagory?._id === selectedCategoryId
+      : true;
+
+    return matchesSearch && matchesCategory;
+  });
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -234,6 +287,8 @@ export default function AdminProductsPage() {
                   description: "",
                   code: "",
                   catagory: "",
+                  tip: [],
+                  size: [],
                   imageCover: null,
                 });
               }}
@@ -321,6 +376,98 @@ export default function AdminProductsPage() {
                   />
                 </div>
 
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between gap-3">
+                      <label className="text-sm font-semibold text-slate-700">
+                        Tips
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => addArrayItem("tip")}
+                        className="text-xs font-semibold text-orange-700 hover:underline"
+                      >
+                        + Add
+                      </button>
+                    </div>
+
+                    {formData.tip.length === 0 ? (
+                      <p className="text-[11px] text-slate-400">
+                        Optional (e.g. Straight, Curved)
+                      </p>
+                    ) : (
+                      <div className="space-y-2">
+                        {formData.tip.map((value, idx) => (
+                          <div key={idx} className="flex items-center gap-2">
+                            <input
+                              type="text"
+                              placeholder="Tip"
+                              className="flex-1 px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 outline-none transition-all focus:border-orange-500 focus:ring-4 focus:ring-orange-50 text-sm"
+                              value={value}
+                              onChange={(e) =>
+                                updateArrayItem("tip", idx, e.target.value)
+                              }
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removeArrayItem("tip", idx)}
+                              className="p-2 rounded-lg text-slate-500 hover:text-red-600 hover:bg-red-50 transition-colors"
+                              aria-label="Remove tip"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between gap-3">
+                      <label className="text-sm font-semibold text-slate-700">
+                        Sizes
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => addArrayItem("size")}
+                        className="text-xs font-semibold text-orange-700 hover:underline"
+                      >
+                        + Add
+                      </button>
+                    </div>
+
+                    {formData.size.length === 0 ? (
+                      <p className="text-[11px] text-slate-400">
+                        Optional (e.g. 12cm, 14cm)
+                      </p>
+                    ) : (
+                      <div className="space-y-2">
+                        {formData.size.map((value, idx) => (
+                          <div key={idx} className="flex items-center gap-2">
+                            <input
+                              type="text"
+                              placeholder="Size"
+                              className="flex-1 px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 outline-none transition-all focus:border-orange-500 focus:ring-4 focus:ring-orange-50 text-sm"
+                              value={value}
+                              onChange={(e) =>
+                                updateArrayItem("size", idx, e.target.value)
+                              }
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removeArrayItem("size", idx)}
+                              className="p-2 rounded-lg text-slate-500 hover:text-red-600 hover:bg-red-50 transition-colors"
+                              aria-label="Remove size"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
                 <div className="space-y-1.5">
                   <label className="text-sm font-semibold text-slate-700">
                     Cover Image
@@ -384,7 +531,7 @@ export default function AdminProductsPage() {
 
       {/* Action Bar */}
       <div className="flex flex-col sm:flex-row gap-4">
-        <div className="relative flex-1 group">
+        <div className="relative group sm:w-3/4">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-orange-500 transition-colors" />
           <input
             type="text"
@@ -393,6 +540,21 @@ export default function AdminProductsPage() {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-11 pr-4 py-3 rounded-xl bg-white border border-slate-200 outline-none transition-all duration-200 focus:border-orange-200 focus:ring-4 focus:ring-orange-50"
           />
+        </div>
+
+        <div className="sm:w-1/4">
+          <select
+            value={selectedCategoryId}
+            onChange={(e) => setSelectedCategoryId(e.target.value)}
+            className="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 outline-none transition-all duration-200 focus:border-orange-200 focus:ring-4 focus:ring-orange-50 text-sm appearance-none"
+          >
+            <option value="">All categories</option>
+            {categories.map((c) => (
+              <option key={c._id} value={c._id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 
@@ -446,13 +608,15 @@ export default function AdminProductsPage() {
                               src={
                                 product.imageCover
                                   ? product.imageCover.startsWith("http")
-                                    ? product.imageCover
-                                    : `/products/${product.imageCover}`
+                                    ? encodeUrlPathSegments(product.imageCover)
+                                    : `${encodeUrlPathSegments(`/products/${product.imageCover}`)}?v=${encodeURIComponent(product.imageCover)}`
                                   : "https://placehold.co/100x100?text=Product"
                               }
                               alt={product.name}
                               fill
-                              className="object-cover"
+                              unoptimized
+                              className="object-contain"
+                              sizes="56px"
                             />
                           </div>
                           <div>

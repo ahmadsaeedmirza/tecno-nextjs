@@ -1,6 +1,7 @@
 const multer = require("multer");
-const sharp = require("sharp");
 const path = require("path");
+const fs = require("fs/promises");
+const sharp = require("sharp");
 const Product = require("./../models/productModel");
 const factory = require("./factoryFunctions");
 const catchAsync = require("./../utlis/catchAsync");
@@ -28,6 +29,34 @@ exports.uploadProductImage = upload.single("imageCover");
 exports.resizeProductImage = catchAsync(async (req, res, next) => {
   if (!req.file) return next();
 
+  const previousImageCover = req.params.id
+    ? (await Product.findById(req.params.id).select("imageCover"))?.imageCover
+    : undefined;
+
+  // Log exactly what was uploaded (helps confirm if source is already cropped)
+  try {
+    const meta = await sharp(req.file.buffer).metadata();
+    console.log("Product image upload:", {
+      productId: req.params.id || "new",
+      originalname: req.file.originalname,
+      mimetype: req.file.mimetype,
+      bytes: req.file.size,
+      width: meta.width,
+      height: meta.height,
+      format: meta.format,
+      previousImageCover,
+    });
+  } catch (e) {
+    console.log("Product image upload (metadata failed):", {
+      productId: req.params.id || "new",
+      originalname: req.file.originalname,
+      mimetype: req.file.mimetype,
+      bytes: req.file.size,
+      previousImageCover,
+      error: e?.message,
+    });
+  }
+
   // Debug: log what we receive
   console.log("Product Form Data:", {
     name: req.body.name,
@@ -37,8 +66,17 @@ exports.resizeProductImage = catchAsync(async (req, res, next) => {
     file: req.file ? req.file.originalname : "no file",
   });
 
-  // Set the filename and add it to req.body so the factoryFunction can save it to the DB
-  req.body.imageCover = `product-${req.params.id || "new"}-${Date.now()}-cover.jpeg`;
+  const extFromMime = (mime) => {
+    if (mime === "image/jpeg") return "jpeg";
+    if (mime === "image/png") return "png";
+    if (mime === "image/webp") return "webp";
+    if (mime === "image/gif") return "gif";
+    return "jpg";
+  };
+
+  // Save original bytes as-is (no crop/resize/re-encode)
+  const fileExt = extFromMime(req.file.mimetype);
+  req.body.imageCover = `product-${req.params.id || "new"}-${Date.now()}-cover.${fileExt}`;
 
   const uploadPath = path.join(
     __dirname,
@@ -46,14 +84,43 @@ exports.resizeProductImage = catchAsync(async (req, res, next) => {
     req.body.imageCover,
   );
 
-  // Process the image: resize, format to jpeg, compress, and save to disk
-  await sharp(req.file.buffer)
-    .resize(2000, 1333) // Adjust dimensions if necessary to match your frontend needs
-    .toFormat("jpeg")
-    .jpeg({ quality: 90 })
-    .toFile(uploadPath);
+  await fs.writeFile(uploadPath, req.file.buffer);
+
+  // On update, remove the previous image file to prevent stale images being served.
+  if (
+    req.params.id &&
+    previousImageCover &&
+    previousImageCover !== req.body.imageCover
+  ) {
+    const previousPath = path.join(
+      __dirname,
+      "../../public/products",
+      previousImageCover,
+    );
+    try {
+      await fs.unlink(previousPath);
+    } catch {
+      // Ignore if file doesn't exist or can't be removed
+    }
+  }
 
   next();
+});
+
+exports.getProductBySlug = catchAsync(async (req, res, next) => {
+  const slug = req.params.slug;
+  const doc = await Product.findOne({ slug });
+
+  if (!doc) {
+    return next(new AppError("No document found with this slug", 404));
+  }
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      data: doc,
+    },
+  });
 });
 
 // Basic CRUD Operations using Factory Functions

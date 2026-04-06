@@ -1,6 +1,6 @@
 const multer = require("multer");
-const sharp = require("sharp");
 const path = require("path");
+const fs = require("fs/promises");
 const Event = require("./../models/eventModel");
 const factory = require("./factoryFunctions");
 const catchAsync = require("./../utlis/catchAsync");
@@ -28,8 +28,16 @@ exports.uploadEventImage = upload.single("imageCover");
 exports.resizeEventImage = catchAsync(async (req, res, next) => {
   if (!req.file) return next();
 
-  // Set the filename and add it to req.body so the factoryFunction can save it to the DB
-  req.body.imageCover = `event-${req.params.id || "new"}-${Date.now()}-cover.jpeg`;
+  const extFromMime = (mime) => {
+    if (mime === "image/jpeg") return "jpeg";
+    if (mime === "image/png") return "png";
+    if (mime === "image/webp") return "webp";
+    if (mime === "image/gif") return "gif";
+    return "jpg";
+  };
+
+  const fileExt = extFromMime(req.file.mimetype);
+  req.body.imageCover = `event-${req.params.id || "new"}-${Date.now()}-cover.${fileExt}`;
 
   const uploadPath = path.join(
     __dirname,
@@ -37,12 +45,7 @@ exports.resizeEventImage = catchAsync(async (req, res, next) => {
     req.body.imageCover,
   );
 
-  // Process the image: resize, format to jpeg, compress, and save to disk
-  await sharp(req.file.buffer)
-    .resize(2000, 1333) // Adjust dimensions if strictly necessary
-    .toFormat("jpeg")
-    .jpeg({ quality: 90 })
-    .toFile(uploadPath);
+  await fs.writeFile(uploadPath, req.file.buffer);
 
   next();
 });

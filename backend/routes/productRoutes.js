@@ -15,6 +15,8 @@ router
     productController.createProduct,
   );
 
+router.route("/slug/:slug").get(productController.getProductBySlug);
+
 router
   .route("/:id")
   .get(productController.getProduct)

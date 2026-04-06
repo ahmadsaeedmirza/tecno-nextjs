@@ -1,10 +1,12 @@
 const multer = require("multer");
-const sharp = require("sharp");
 const path = require("path");
+const fs = require("fs/promises");
 const Catagory = require("./../models/catagoryModel");
+const Product = require("./../models/productModel");
 const factory = require("./factoryFunctions");
 const catchAsync = require("./../utlis/catchAsync");
 const AppError = require("./../utlis/appError");
+const APIFeatures = require("./../utlis/apiFeatures");
 
 const multerStorage = multer.memoryStorage();
 
@@ -28,8 +30,16 @@ exports.uploadCatagoryImage = upload.single("imageCover");
 exports.resizeCatagoryImage = catchAsync(async (req, res, next) => {
   if (!req.file) return next();
 
-  // Set the filename and add it to req.body so the factoryFunction can save it to the DB
-  req.body.imageCover = `catagory-${req.params.id || "new"}-${Date.now()}-cover.jpeg`;
+  const extFromMime = (mime) => {
+    if (mime === "image/jpeg") return "jpeg";
+    if (mime === "image/png") return "png";
+    if (mime === "image/webp") return "webp";
+    if (mime === "image/gif") return "gif";
+    return "jpg";
+  };
+
+  const fileExt = extFromMime(req.file.mimetype);
+  req.body.imageCover = `catagory-${req.params.id || "new"}-${Date.now()}-cover.${fileExt}`;
 
   const uploadPath = path.join(
     __dirname,
@@ -37,12 +47,7 @@ exports.resizeCatagoryImage = catchAsync(async (req, res, next) => {
     req.body.imageCover,
   );
 
-  // Process the image: resize, format to jpeg, compress, and save to disk
-  await sharp(req.file.buffer)
-    .resize(2000, 1333) // Adjust dimensions if necessary
-    .toFormat("jpeg")
-    .jpeg({ quality: 90 })
-    .toFile(uploadPath);
+  await fs.writeFile(uploadPath, req.file.buffer);
 
   next();
 });
@@ -50,6 +55,53 @@ exports.resizeCatagoryImage = catchAsync(async (req, res, next) => {
 // Basic CRUD Operations using Factory Functions
 exports.getAllCatagories = factory.getAll(Catagory);
 exports.getCatagory = factory.getOne(Catagory);
+
+exports.getCatagoryBySlug = catchAsync(async (req, res, next) => {
+  const doc = await Catagory.findOne({ slug: req.params.slug });
+
+  if (!doc) {
+    return next(new AppError("No document found with this slug", 404));
+  }
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      data: doc,
+    },
+  });
+});
+
+exports.getProductsForCatagorySlug = catchAsync(async (req, res, next) => {
+  const catagory = await Catagory.findOne({ slug: req.params.slug });
+
+  if (!catagory) {
+    return next(new AppError("No category found with this slug", 404));
+  }
+
+  // Prevent overriding our base filter with a query string
+  const queryStr = { ...req.query };
+  delete queryStr.catagory;
+
+  const features = new APIFeatures(
+    Product.find({ catagory: catagory._id }),
+    queryStr,
+  )
+    .filter()
+    .sort()
+    .limitFields()
+    .paginate();
+
+  const doc = await features.query;
+
+  res.status(200).json({
+    status: "success",
+    resuts: doc.length,
+    data: {
+      data: doc,
+    },
+  });
+});
+
 exports.createCatagory = factory.createOne(Catagory);
 exports.updateCatagory = factory.updateOne(Catagory);
 exports.deleteCatagory = factory.deleteOne(Catagory);

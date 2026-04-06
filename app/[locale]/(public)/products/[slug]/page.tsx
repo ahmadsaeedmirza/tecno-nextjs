@@ -4,117 +4,157 @@ import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { motion } from "framer-motion";
-import { Suspense } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Check, ArrowLeft, ArrowRight } from "lucide-react";
-import InstrumentViewer3D from "@/components/InstrumentViewer3D";
+import { API_BASE_URL, publicFetch } from "@/lib/api-client";
+import { encodeUrlPathSegments } from "@/lib/utils";
+import ProductCard from "@/components/ProductCard";
+import type { Product } from "@/data/products";
 
-// Sample products - replace with actual data from products.ts
-const allProducts = [
-  {
-    id: "1",
-    slug: "surgical-scissors-straight",
-    name: "Surgical Scissors - Straight",
-    category: "Surgical",
-    categorySlug: "surgical",
-    description:
-      "Premium stainless steel surgical scissors with precise cutting edge. Designed for accuracy and durability in surgical environments.",
-    material: "German Stainless Steel",
-    image: "/images/product-1.jpg",
-    features: [
-      "Razor-sharp cutting edge maintained through 500+ autoclave cycles",
-      "Ergonomic handle design for reduced hand fatigue",
-      "Nylon-coated for improved grip control",
-      "Available in multiple sizes and styles",
-      "ISO certified and CE approved",
-      "Free lifetime sharpening service",
-    ],
-  },
-  {
-    id: "2",
-    slug: "surgical-forceps",
-    name: "Surgical Forceps",
-    category: "Surgical",
-    categorySlug: "surgical",
-    description:
-      "Precision-engineered surgical forceps for delicate procedures requiring exceptional control and visibility.",
-    material: "Japanese Steel",
-    image: "/images/product-2.jpg",
-    features: [
-      "Fine, aligned tips for precise tissue handling",
-      "Anti-glare finish for better visualization",
-      "Smooth locking mechanism",
-      "Works seamlessly in minimally invasive surgery",
-      "Fully autoclavable design",
-      "Tungsten carbide inserts available",
-    ],
-  },
-  {
-    id: "3",
-    slug: "needle-holder",
-    name: "Needle Holder",
-    category: "Surgical",
-    categorySlug: "surgical",
-    description:
-      "Ergonomic needle holder with precision engineered locking mechanism for surgical suturing.",
-    material: "Hardened Steel",
-    image: "/images/product-3.jpg",
-    features: [
-      "Secure needle grip with carbide inserts",
-      "Smooth locking action preventing needle slippage",
-      "Comfortable, non-slip handle",
-      "Suitable for all suture types",
-      "Tested on 5000+ procedures",
-      "Lifetime warranty on locking mechanism",
-    ],
-  },
-  {
-    id: "4",
-    slug: "dental-mirror",
-    name: "Dental Mirror",
-    category: "Dental",
-    categorySlug: "dental",
-    description:
-      "High-quality reflective dental examination mirror for enhanced visibility in dental procedures.",
-    material: "Stainless Steel",
-    image: "/images/product-4.jpg",
-    features: [
-      "Anti-fog coating for clarity",
-      "Distortion-free reflection",
-      "Comfortable handle reduces hand strain",
-      "Available in multiple head sizes",
-      "Scratch-resistant optical surface",
-      "Easy to clean and sterilize",
-    ],
-  },
-  {
-    id: "5",
-    slug: "dental-explorer",
-    name: "Dental Explorer",
-    category: "Dental",
-    categorySlug: "dental",
-    description:
-      "Precision dental explorer for cavity detection and assessment during dental examinations.",
-    material: "Stainless Steel",
-    image: "/images/product-5.jpg",
-    features: [
-      "Ultra-fine, sharp tip for cavity detection",
-      "Flexible yet durable shaft",
-      "Comfortable, ergonomic grip",
-      "Perfect for interproximal and occlusal surfaces",
-      "Autoclavable to 900°F",
-      "Lifetime sharpness guarantee",
-    ],
-  },
-];
+type BackendProduct = {
+  _id: string;
+  name: string;
+  slug: string;
+  description: string;
+  code?: string;
+  tip?: string[];
+  size?: string[];
+  imageCover: string;
+  isHidden?: "true" | "false" | boolean;
+  catagory?: {
+    _id: string;
+    name: string;
+    slug: string;
+  };
+};
+
+type ApiOneResponse<T> = {
+  status: string;
+  data?: {
+    data?: T;
+  };
+};
+
+type ApiListResponse<T> = {
+  status: string;
+  data?: {
+    data?: T[];
+  };
+};
 
 const ProductDetail = () => {
   const t = useTranslations("Products");
   const params = useParams();
   const slug = params.slug as string;
 
-  const product = allProducts.find((p) => p.slug === slug);
+  const [product, setProduct] = useState<BackendProduct | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
 
-  if (!product) {
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      if (!slug) {
+        setProduct(null);
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        const res = (await publicFetch(
+          `/api/v1/products/slug/${encodeURIComponent(slug)}`,
+        )) as ApiOneResponse<BackendProduct>;
+
+        const found = res?.data?.data ?? null;
+        if (!cancelled) setProduct(found);
+      } catch {
+        if (!cancelled) setProduct(null);
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    }
+
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [slug]);
+
+  const features = useMemo(() => {
+    const items = [...(product?.tip ?? []), ...(product?.size ?? [])]
+      .map((s) => (typeof s === "string" ? s.trim() : ""))
+      .filter(Boolean);
+    return Array.from(new Set(items));
+  }, [product]);
+
+  const imageSrc = useMemo(() => {
+    if (!product?.imageCover) return "/products/dummy.jpg";
+    return encodeUrlPathSegments(
+      `${API_BASE_URL}/products/${product.imageCover}`,
+    );
+  }, [product]);
+
+  const categoryName = product?.catagory?.name || "";
+  const categorySlug = product?.catagory?.slug || "";
+  const categoryId = product?.catagory?._id || "";
+
+  const contactHref = useMemo(() => {
+    const params = new URLSearchParams();
+    if (categoryId) params.set("catagory", categoryId);
+    if (product?._id) params.set("product", product._id);
+    const qs = params.toString();
+    return `/contact${qs ? `?${qs}` : ""}`;
+  }, [categoryId, product?._id]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadRelated() {
+      if (!product?._id || !categorySlug) {
+        setRelatedProducts([]);
+        return;
+      }
+
+      try {
+        const res = (await publicFetch(
+          `/api/v1/catagories/${encodeURIComponent(categorySlug)}/products?limit=10`,
+        )) as ApiListResponse<BackendProduct>;
+
+        const items = (res?.data?.data ?? [])
+          .filter((p) => p && p._id !== product._id)
+          .filter((p) => p.isHidden !== "true" && p.isHidden !== true)
+          .slice(0, 3)
+          .map<Product>((p) => ({
+            id: p._id,
+            slug: p.slug,
+            name: p.name,
+            category: p.catagory?.name || "",
+            categorySlug: p.catagory?.slug || "",
+            description: p.description,
+            image: p.imageCover
+              ? encodeUrlPathSegments(
+                  `${API_BASE_URL}/products/${p.imageCover}`,
+                )
+              : "/products/dummy.jpg",
+            features: [],
+            material: p.code || "",
+          }));
+
+        if (!cancelled) setRelatedProducts(items);
+      } catch {
+        if (!cancelled) setRelatedProducts([]);
+      }
+    }
+
+    loadRelated();
+    return () => {
+      cancelled = true;
+    };
+  }, [product?._id, categorySlug]);
+
+  if (!isLoading && !product) {
     return (
       <div className="section-container pt-28 pb-20 text-center">
         <h1 className="font-display text-3xl font-bold mb-4">
@@ -127,14 +167,22 @@ const ProductDetail = () => {
     );
   }
 
+  if (isLoading) {
+    return (
+      <div className="section-container pt-28 pb-20 text-center">
+        <p className="text-muted-foreground">Loading...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="pt-24 pb-20">
       <div className="section-container">
         <Link
-          href={`/products/catagory?category=${product.categorySlug}`}
+          href={`/products/catagory?category=${encodeURIComponent(categorySlug)}`}
           className="text-muted-foreground text-sm hover:text-primary inline-flex items-center gap-1 mb-8 transition-colors"
         >
-          <ArrowLeft className="w-3 h-3" /> {t("backTo")} {product.category}
+          <ArrowLeft className="w-3 h-3" /> {t("backTo")} {categoryName}
         </Link>
 
         <div className="grid lg:grid-cols-2 gap-16">
@@ -145,29 +193,10 @@ const ProductDetail = () => {
           >
             <div className="rounded-2xl overflow-hidden bg-secondary/30 border border-border/10">
               <img
-                src={product.image}
-                alt={product.name}
+                src={imageSrc}
+                alt={product?.name || ""}
                 className="w-full aspect-square object-cover"
               />
-            </div>
-
-            <div className="mt-6 glass-card rounded-2xl overflow-hidden">
-              <div className="p-4 border-b border-border/10">
-                <p className="text-xs uppercase tracking-[0.2em] text-primary font-medium">
-                  {t("threeDPreview")}
-                </p>
-              </div>
-              <Suspense
-                fallback={
-                  <div className="h-[300px] flex items-center justify-center">
-                    <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                  </div>
-                }
-              >
-                <div className="h-[300px]">
-                  <InstrumentViewer3D />
-                </div>
-              </Suspense>
             </div>
           </motion.div>
 
@@ -176,46 +205,50 @@ const ProductDetail = () => {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.7, delay: 0.15 }}
           >
-            <p className="text-primary uppercase tracking-[0.3em] text-xs mb-3">
-              {product.category}
-            </p>
+            {categoryName ? (
+              <p className="text-primary uppercase tracking-[0.3em] text-xs mb-3">
+                {categoryName}
+              </p>
+            ) : null}
             <h1 className="font-display text-4xl sm:text-5xl font-black mb-6 leading-tight">
-              {product.name}
+              {product?.name || ""}
             </h1>
             <p className="text-muted-foreground leading-relaxed text-lg mb-8">
-              {product.description}
+              {product?.description || ""}
             </p>
 
             <div className="glass-card p-6 mb-6 rounded-xl">
               <h3 className="font-display font-semibold text-xs uppercase tracking-[0.2em] mb-3 text-muted-foreground">
-                {t("materialLabel")}
+                {t("codeLabel")}
               </h3>
               <p className="text-foreground font-display font-semibold text-lg">
-                {product.material}
+                {product?.code || "—"}
               </p>
             </div>
 
-            <div className="glass-card p-6 mb-8 rounded-xl">
-              <h3 className="font-display font-semibold text-xs uppercase tracking-[0.2em] mb-4 text-muted-foreground">
-                {t("featuresLabel")}
-              </h3>
-              <ul className="space-y-3">
-                {product.features.map((f, idx) => (
-                  <li
-                    key={idx}
-                    className="flex items-center gap-3 text-sm text-foreground/80"
-                  >
-                    <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <Check className="w-3 h-3 text-primary" />
-                    </div>
-                    {f}
-                  </li>
-                ))}
-              </ul>
-            </div>
+            {features.length ? (
+              <div className="glass-card p-6 mb-8 rounded-xl">
+                <h3 className="font-display font-semibold text-xs uppercase tracking-[0.2em] mb-4 text-muted-foreground">
+                  {t("featuresLabel")}
+                </h3>
+                <ul className="space-y-3">
+                  {features.map((f, idx) => (
+                    <li
+                      key={`${f}-${idx}`}
+                      className="flex items-center gap-3 text-sm text-foreground/80"
+                    >
+                      <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <Check className="w-3 h-3 text-primary" />
+                      </div>
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
 
             <Link
-              href={`/inquiry?product=${encodeURIComponent(product.name)}`}
+              href={contactHref}
               className="gradient-button px-10 py-4 text-base inline-flex items-center gap-2 group"
             >
               {t("sendInquiry")}
@@ -223,6 +256,19 @@ const ProductDetail = () => {
             </Link>
           </motion.div>
         </div>
+
+        {relatedProducts.length ? (
+          <div className="mt-16">
+            <h2 className="font-display text-2xl font-bold mb-6">
+              You may also like
+            </h2>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {relatedProducts.map((p) => (
+                <ProductCard key={p.id} product={p} />
+              ))}
+            </div>
+          </div>
+        ) : null}
       </div>
     </div>
   );

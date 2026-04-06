@@ -15,6 +15,12 @@ router
     catagoryController.createCatagory,
   );
 
+router.route("/slug/:slug").get(catagoryController.getCatagoryBySlug);
+
+router
+  .route("/:slug/products")
+  .get(catagoryController.getProductsForCatagorySlug);
+
 router
   .route("/:id")
   .get(catagoryController.getCatagory)

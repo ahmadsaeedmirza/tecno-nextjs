@@ -2,9 +2,10 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Menu, X, Search, ChevronDown, Globe } from "lucide-react";
-import { categories } from "@/data/products";
 import { useTranslations, useLocale } from "next-intl";
 import { Link, useRouter, usePathname } from "@/i18n/routing";
+import { API_BASE_URL, publicFetch } from "@/lib/api-client";
+import { encodeUrlPathSegments } from "@/lib/utils";
 
 const tecnoLogo = "/tecno-logo.webp";
 
@@ -27,10 +28,62 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [showProducts, setShowProducts] = useState(false);
   const [showLang, setShowLang] = useState(false);
+  const [navCategories, setNavCategories] = useState<
+    Array<{
+      _id: string;
+      name: string;
+      slug: string;
+      imageCover?: string;
+      isHidden?: "true" | "false" | boolean;
+    }>
+  >([]);
+  const [navCategoriesTotal, setNavCategoriesTotal] = useState(0);
   const t = useTranslations("Navbar");
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadCategories() {
+      try {
+        const res = (await publicFetch(
+          `/api/v1/catagories?limit=5000&sort=name`,
+        )) as {
+          status: string;
+          data?: { data?: any[] };
+        };
+
+        const all = (res?.data?.data ?? []) as Array<{
+          _id: string;
+          name: string;
+          slug: string;
+          imageCover?: string;
+          isHidden?: "true" | "false" | boolean;
+        }>;
+
+        const visible = all.filter(
+          (c) => c && c.isHidden !== "true" && c.isHidden !== true,
+        );
+
+        if (!cancelled) {
+          setNavCategoriesTotal(visible.length);
+          setNavCategories(visible.slice(0, 8));
+        }
+      } catch {
+        if (!cancelled) {
+          setNavCategoriesTotal(0);
+          setNavCategories([]);
+        }
+      }
+    }
+
+    loadCategories();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const navLinks = [
     { href: "/", label: t("home") },
@@ -108,15 +161,21 @@ const Navbar = () => {
                   onMouseEnter={handleProductsEnter}
                   onMouseLeave={handleProductsLeave}
                 >
-                  {categories.slice(0, 8).map((cat) => (
+                  {navCategories.map((cat) => (
                     <Link
                       key={cat.slug}
-                      href={`/products/${cat.slug}`}
+                      href={`/products/catagory?category=${encodeURIComponent(cat.slug)}`}
                       onClick={() => setShowProducts(false)}
                       className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-muted transition-colors group"
                     >
                       <img
-                        src={cat.image}
+                        src={
+                          cat.imageCover
+                            ? encodeUrlPathSegments(
+                                `${API_BASE_URL}/categories/${cat.imageCover}`,
+                              )
+                            : "/categories/dummy.jpg"
+                        }
                         alt={cat.name}
                         className="w-10 h-10 rounded-md object-cover flex-shrink-0"
                       />
@@ -124,19 +183,18 @@ const Navbar = () => {
                         <p className="text-xs font-bold text-foreground group-hover:text-primary transition-colors truncate">
                           {cat.name}
                         </p>
-                        <p className="text-[10px] text-muted-foreground">
-                          {cat.productCount} {t("instruments")}
-                        </p>
                       </div>
                     </Link>
                   ))}
-                  <Link
-                    href="/products"
-                    onClick={() => setShowProducts(false)}
-                    className="col-span-2 text-center text-xs font-bold text-primary hover:underline mt-2 py-1"
-                  >
-                    {t('viewAll')}
-                  </Link>
+                  {navCategoriesTotal > 8 ? (
+                    <Link
+                      href="/products"
+                      onClick={() => setShowProducts(false)}
+                      className="col-span-2 text-center text-xs font-bold text-primary hover:underline mt-2 py-1"
+                    >
+                      {t("viewAll")}
+                    </Link>
+                  ) : null}
                 </div>
               )}
             </div>
