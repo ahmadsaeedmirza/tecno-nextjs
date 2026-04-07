@@ -12,11 +12,11 @@ const ProductCard = ({ product }: { product: Product }) => {
   const imageSrc = encodeUrlPathSegments(product.image);
 
   return (
-    <Link href={`/products/${product.slug}`} className="group block">
+    <Link href={`/products/${product.slug}`} className="group block h-full">
       <motion.div
         whileHover={{ y: -6 }}
         transition={{ duration: 0.3, ease: "easeOut" }}
-        className="glass-card overflow-hidden"
+        className="glass-card overflow-hidden h-full flex flex-col"
       >
         <div className="aspect-[4/3] bg-background overflow-hidden relative">
           <img
@@ -26,14 +26,14 @@ const ProductCard = ({ product }: { product: Product }) => {
             loading="lazy"
           />
         </div>
-        <div className="p-4">
+        <div className="p-4 flex flex-col flex-1">
           <p className="text-[8px] uppercase tracking-[0.25em] text-primary mb-1">
             {product.category}
           </p>
           <h3 className="font-display font-bold text-sm text-foreground group-hover:text-primary transition-colors mb-1">
             {product.name}
           </h3>
-          <p className="text-[11px] text-muted-foreground line-clamp-2 mb-2">
+          <p className="text-[11px] text-muted-foreground line-clamp-2 mb-2 flex-1">
             {product.description}
           </p>
           <div className="flex items-center justify-between">

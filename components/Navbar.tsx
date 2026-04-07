@@ -9,8 +9,6 @@ import { encodeUrlPathSegments } from "@/lib/utils";
 
 const tecnoLogo = "/tecno-logo.webp";
 
-
-
 const languages = [
   { code: "en", label: "English" },
   { code: "de", label: "Deutsch" },
@@ -121,9 +119,7 @@ const Navbar = () => {
   };
 
   return (
-    <header
-      className="sticky top-0 left-0 right-0 z-50 bg-white py-4 shadow-sm transition-all duration-500"
-    >
+    <header className="sticky top-0 left-0 right-0 z-50 bg-white py-4 shadow-sm transition-all duration-500">
       <div className="section-container flex items-center justify-between h-20">
         <Link href="/" className="flex items-center">
           <img
@@ -144,11 +140,12 @@ const Navbar = () => {
             >
               <Link
                 href={l.href}
-                className={`px-3 py-2 text-[15px] font-bold rounded-md transition-all duration-300 inline-flex items-center gap-1 ${pathname === l.href ||
+                className={`px-3 py-2 text-[15px] font-bold rounded-md transition-all duration-300 inline-flex items-center gap-1 ${
+                  pathname === l.href ||
                   (l.hasDropdown && pathname.startsWith("/products"))
-                  ? "text-primary"
-                  : "text-foreground hover:text-primary"
-                  }`}
+                    ? "text-primary"
+                    : "text-foreground hover:text-primary"
+                }`}
               >
                 {l.label}
                 {l.hasDropdown && <ChevronDown className="w-3.5 h-3.5" />}
@@ -242,10 +239,11 @@ const Navbar = () => {
                       router.push(pathname, { locale: lang.code });
                       setShowLang(false);
                     }}
-                    className={`w-full text-left px-3 py-1.5 text-xs transition-colors ${locale === lang.code
-                      ? "text-primary font-bold"
-                      : "text-foreground hover:text-primary hover:bg-muted"
-                      }`}
+                    className={`w-full text-left px-3 py-1.5 text-xs transition-colors ${
+                      locale === lang.code
+                        ? "text-primary font-bold"
+                        : "text-foreground hover:text-primary hover:bg-muted"
+                    }`}
                   >
                     {lang.label}
                   </button>
@@ -273,15 +271,16 @@ const Navbar = () => {
                 key={l.href}
                 href={l.href}
                 onClick={() => setOpen(false)}
-                className={`px-3 py-2 text-sm font-bold rounded-md transition-colors ${pathname === l.href
-                  ? "text-primary"
-                  : "text-foreground hover:text-primary"
-                  }`}
+                className={`px-3 py-2 text-sm font-bold rounded-md transition-colors ${
+                  pathname === l.href
+                    ? "text-primary"
+                    : "text-foreground hover:text-primary"
+                }`}
               >
                 {l.label}
               </Link>
             ))}
-            
+
             {/* Mobile Language Selector */}
             <div className="mt-4 pt-4 border-t border-border/20">
               <p className="px-3 text-xs font-bold text-muted-foreground uppercase mb-2">
@@ -295,12 +294,15 @@ const Navbar = () => {
                       router.push(pathname, { locale: lang.code });
                       setOpen(false);
                     }}
-                    className={`flex items-center gap-2 px-3 py-2 text-sm font-bold rounded-md transition-colors ${locale === lang.code
-                      ? "text-primary bg-primary/5"
-                      : "text-foreground hover:text-primary hover:bg-muted"
-                      }`}
+                    className={`flex items-center gap-2 px-3 py-2 text-sm font-bold rounded-md transition-colors ${
+                      locale === lang.code
+                        ? "text-primary bg-primary/5"
+                        : "text-foreground hover:text-primary hover:bg-muted"
+                    }`}
                   >
-                    <span className="text-[10px] opacity-70">{lang.code.toUpperCase()}</span>
+                    <span className="text-[10px] opacity-70">
+                      {lang.code.toUpperCase()}
+                    </span>
                     {lang.label}
                   </button>
                 ))}
