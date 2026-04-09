@@ -457,7 +457,8 @@ const Index = () => {
       </section>
 
       {/* ===== EXHIBITION SECTION ===== */}
-      <section className="py-16 relative bg-muted/10">
+      {latestEvent && (
+        <section className="py-16 relative bg-muted/10">
         <div className="section-container">
           <TextReveal>
             <div className="text-center mb-10">
@@ -473,14 +474,8 @@ const Index = () => {
           <div className="flex flex-col md:flex-row shadow-xl rounded-2xl overflow-hidden bg-card border border-border">
             <div className="w-full md:w-1/2 relative h-64 md:h-auto min-h-[300px]">
               <img
-                src={
-                  latestEvent?.imageCover
-                    ? encodeUrlPathSegments(
-                        `${API_BASE_URL}/events/${latestEvent.imageCover}`,
-                      )
-                    : "/images/exhibition_booth.png"
-                }
-                alt={latestEvent?.name || "Tecno Industries Exhibition Booth"}
+                src={encodeUrlPathSegments(`${API_BASE_URL}/events/${latestEvent.imageCover}`)}
+                alt={latestEvent.name}
                 className="w-full h-full object-cover absolute inset-0"
               />
             </div>
@@ -490,20 +485,20 @@ const Index = () => {
                   <Globe className="w-3.5 h-3.5" /> {t("upcomingEvent")}
                 </div>
                 <h3 className="text-2xl font-bold font-display mb-3">
-                  {latestEvent?.name || t("exhibitionEvent")}
+                  {latestEvent.name}
                 </h3>
-                <p className="text-muted-foreground mb-4">
-                  {latestEvent?.description || t("exhibitionDesc")}
+                <p className="text-muted-foreground mb-4 line-clamp-3">
+                  {latestEvent.description}
                 </p>
-                <div className="flex items-center gap-2 text-sm font-medium text-foreground mb-8">
-                  <span className="bg-muted px-2.5 py-1 rounded">
-                    {t("date")}:
+                <div className="flex flex-wrap items-center gap-3 text-sm font-medium text-foreground mb-8">
+                  <span className="bg-muted px-2.5 py-1 rounded border border-border">
+                    {t("date")}: {new Date(latestEvent.date).toLocaleDateString()}
                   </span>
-                  <span>
-                    {latestEvent?.date
-                      ? new Date(latestEvent.date).toLocaleDateString()
-                      : "1/2/2026"}
-                  </span>
+                  {latestEvent.StallNo && (
+                    <span className="bg-muted px-2.5 py-1 rounded border border-border">
+                      Stall: {latestEvent.StallNo}
+                    </span>
+                  )}
                 </div>
                 <Link
                   href="/events"
@@ -516,6 +511,7 @@ const Index = () => {
           </div>
         </div>
       </section>
+      )}
 
       {/* ===== FEATURED PRODUCTS (Best Sellers) ===== */}
       <section className="section-container py-10">
