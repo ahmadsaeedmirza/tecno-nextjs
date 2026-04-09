@@ -11,7 +11,8 @@
     "searchPlaceholder": "البحث عن المنتجات...",
     "viewAll": "عرض جميع الفئات ←",
     "instruments": "أدوات",
-    "language": "اللغة"
+    "language": "اللغة",
+    "events": "Exhibitions"
   },
   "Footer": {
     "description": "الشركة المصنعة الرائدة للأدوات الجراحية الدقيقة ذات الانتشار العالمي. جودة معتمدة من ISO والتزام بالتميز في الرعاية الصحية.",
@@ -252,5 +253,16 @@
     "details": "التفاصيل",
     "sendInquiry": "إرسال استفسار",
     "noProducts": "لا توجد منتجات في هذه الفئة بعد."
+  },
+  "Events": {
+    "badge": "GLOBAL REACH",
+    "title": "Exhibitions & Events",
+    "subtitle": "Join us around the globe as we showcase our latest in electrosurgical innovations and forge new partnerships.",
+    "upcomingTitle": "Upcoming Exhibitions",
+    "previousTitle": "Past Exhibitions",
+    "stall": "Stall No:",
+    "date": "Date:",
+    "noUpcoming": "There are currently no upcoming events scheduled. Please check back later or review our past events below.",
+    "heroBadge": "NEXT UPCOMING EVENT"
   }
 }

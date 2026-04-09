@@ -15,6 +15,7 @@ import {
   Loader2,
   X,
   Upload,
+  Star,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
@@ -40,8 +41,9 @@ interface Product {
   size?: string[];
   description: string;
   isHidden: string;
+  isFeatured: string;
   imageCover: string;
-  catagory?: Category;
+  category?: Category;
   slug: string;
 }
 
@@ -61,7 +63,7 @@ export default function AdminProductsPage() {
     name: "",
     description: "",
     code: "",
-    catagory: "",
+    category: "",
     tip: [] as string[],
     size: [] as string[],
     imageCover: null as File | null,
@@ -97,7 +99,7 @@ export default function AdminProductsPage() {
       setIsLoading(true);
       const [productsRes, categoriesRes] = await Promise.all([
         adminFetch("/api/v1/products"),
-        adminFetch("/api/v1/catagories"),
+        adminFetch("/api/v1/categories"),
       ]);
       setProducts(productsRes.data.data);
       setCategories(categoriesRes.data.data);
@@ -125,15 +127,24 @@ export default function AdminProductsPage() {
       data.append("name", formData.name);
       data.append("description", formData.description);
       if (formData.code) data.append("code", formData.code);
-      if (formData.catagory) data.append("catagory", formData.catagory);
+      if (formData.category) data.append("category", formData.category);
 
-      for (const tip of formData.tip) {
-        const trimmed = tip.trim();
-        if (trimmed) data.append("tip", trimmed);
+      if (formData.tip.length === 0) {
+        data.append("tip", "[]");
+      } else {
+        for (const tip of formData.tip) {
+          const trimmed = tip.trim();
+          if (trimmed) data.append("tip", trimmed);
+        }
       }
-      for (const size of formData.size) {
-        const trimmed = size.trim();
-        if (trimmed) data.append("size", trimmed);
+
+      if (formData.size.length === 0) {
+        data.append("size", "[]");
+      } else {
+        for (const size of formData.size) {
+          const trimmed = size.trim();
+          if (trimmed) data.append("size", trimmed);
+        }
       }
 
       if (formData.imageCover) data.append("imageCover", formData.imageCover);
@@ -164,7 +175,7 @@ export default function AdminProductsPage() {
         name: "",
         description: "",
         code: "",
-        catagory: "",
+        category: "",
         tip: [],
         size: [],
         imageCover: null,
@@ -187,7 +198,7 @@ export default function AdminProductsPage() {
       name: product.name || "",
       description: product.description || "",
       code: product.code || "",
-      catagory: product.catagory?._id || "",
+      category: product.category?._id || "",
       tip: product.tip || [],
       size: product.size || [],
       imageCover: null,
@@ -203,7 +214,7 @@ export default function AdminProductsPage() {
         name: "",
         description: "",
         code: "",
-        catagory: "",
+        category: "",
         tip: [],
         size: [],
         imageCover: null,
@@ -220,6 +231,27 @@ export default function AdminProductsPage() {
       });
       toast({
         title: `Product ${newStatus === "true" ? "hidden" : "visible"}`,
+        description: `${product.name} has been updated.`,
+      });
+      fetchInitialData();
+    } catch (err: any) {
+      toast({
+        variant: "destructive",
+        title: "Action failed",
+        description: err.message,
+      });
+    }
+  };
+
+  const handleToggleFeature = async (product: Product) => {
+    const newStatus = product.isFeatured === "true" ? "false" : "true";
+    try {
+      await adminFetch(`/api/v1/products/${product._id}`, {
+        method: "PATCH",
+        body: { isFeatured: newStatus },
+      });
+      toast({
+        title: `Product ${newStatus === "true" ? "featured" : "unfeatured"}`,
         description: `${product.name} has been updated.`,
       });
       fetchInitialData();
@@ -259,7 +291,7 @@ export default function AdminProductsPage() {
       p.code?.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesCategory = selectedCategoryId
-      ? p.catagory?._id === selectedCategoryId
+      ? p.category?._id === selectedCategoryId
       : true;
 
     return matchesSearch && matchesCategory;
@@ -286,7 +318,7 @@ export default function AdminProductsPage() {
                   name: "",
                   description: "",
                   code: "",
-                  catagory: "",
+                  category: "",
                   tip: [],
                   size: [],
                   imageCover: null,
@@ -345,9 +377,9 @@ export default function AdminProductsPage() {
                     <select
                       required
                       className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 outline-none transition-all focus:border-orange-500 focus:ring-4 focus:ring-orange-50 text-sm appearance-none"
-                      value={formData.catagory}
+                      value={formData.category}
                       onChange={(e) =>
-                        setFormData({ ...formData, catagory: e.target.value })
+                        setFormData({ ...formData, category: e.target.value })
                       }
                     >
                       <option value="">Select Category</option>
@@ -402,7 +434,7 @@ export default function AdminProductsPage() {
                             <input
                               type="text"
                               placeholder="Tip"
-                              className="flex-1 px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 outline-none transition-all focus:border-orange-500 focus:ring-4 focus:ring-orange-50 text-sm"
+                              className="flex-1 min-w-0 px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 outline-none transition-all focus:border-orange-500 focus:ring-4 focus:ring-orange-50 text-sm"
                               value={value}
                               onChange={(e) =>
                                 updateArrayItem("tip", idx, e.target.value)
@@ -411,7 +443,7 @@ export default function AdminProductsPage() {
                             <button
                               type="button"
                               onClick={() => removeArrayItem("tip", idx)}
-                              className="p-2 rounded-lg text-slate-500 hover:text-red-600 hover:bg-red-50 transition-colors"
+                              className="shrink-0 p-2.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 transition-colors border border-red-100"
                               aria-label="Remove tip"
                             >
                               <X className="w-4 h-4" />
@@ -447,7 +479,7 @@ export default function AdminProductsPage() {
                             <input
                               type="text"
                               placeholder="Size"
-                              className="flex-1 px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 outline-none transition-all focus:border-orange-500 focus:ring-4 focus:ring-orange-50 text-sm"
+                              className="flex-1 min-w-0 px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 outline-none transition-all focus:border-orange-500 focus:ring-4 focus:ring-orange-50 text-sm"
                               value={value}
                               onChange={(e) =>
                                 updateArrayItem("size", idx, e.target.value)
@@ -456,7 +488,7 @@ export default function AdminProductsPage() {
                             <button
                               type="button"
                               onClick={() => removeArrayItem("size", idx)}
-                              className="p-2 rounded-lg text-slate-500 hover:text-red-600 hover:bg-red-50 transition-colors"
+                              className="shrink-0 p-2.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 transition-colors border border-red-100"
                               aria-label="Remove size"
                             >
                               <X className="w-4 h-4" />
@@ -631,23 +663,44 @@ export default function AdminProductsPage() {
                       </td>
                       <td className="px-6 py-4 hidden md:table-cell">
                         <span className="px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-medium">
-                          {product.catagory?.name || "Uncategorized"}
+                          {product.category?.name || "Uncategorized"}
                         </span>
                       </td>
                       <td className="px-6 py-4 hidden lg:table-cell">
-                        <div className="flex items-center gap-2">
-                          <span
-                            className={`w-1.5 h-1.5 rounded-full ${product.isHidden === "true" ? "bg-amber-400" : "bg-emerald-500"}`}
-                          />
-                          <span
-                            className={`text-xs font-semibold ${product.isHidden === "true" ? "text-amber-600" : "text-emerald-700"}`}
-                          >
-                            {product.isHidden === "true" ? "Hidden" : "Public"}
-                          </span>
+                        <div className="flex flex-col gap-1">
+                          <div className="flex items-center gap-2">
+                            <span
+                              className={`w-1.5 h-1.5 rounded-full ${product.isHidden === "true" ? "bg-amber-400" : "bg-emerald-500"}`}
+                            />
+                            <span
+                              className={`text-xs font-semibold ${product.isHidden === "true" ? "text-amber-600" : "text-emerald-700"}`}
+                            >
+                              {product.isHidden === "true" ? "Hidden" : "Public"}
+                            </span>
+                          </div>
+                          {product.isFeatured === "true" && (
+                            <div className="flex items-center gap-1.5">
+                              <Star className="w-3 h-3 text-orange-500 fill-orange-500" />
+                              <span className="text-[10px] font-bold text-orange-600 uppercase tracking-wider">
+                                Featured
+                              </span>
+                            </div>
+                          )}
                         </div>
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={() => handleToggleFeature(product)}
+                            className={`p-2 rounded-lg transition-colors ${product.isFeatured === "true" ? "text-orange-600 hover:bg-orange-50" : "text-slate-400 hover:text-orange-500 hover:bg-slate-50"}`}
+                            title={
+                              product.isFeatured === "true"
+                                ? "Unfeature Product"
+                                : "Feature Product"
+                            }
+                          >
+                            <Star className={`w-4 h-4 ${product.isFeatured === "true" ? "fill-current" : ""}`} />
+                          </button>
                           <button
                             onClick={() => handleToggleHide(product)}
                             className={`p-2 rounded-lg transition-colors ${product.isHidden === "true" ? "text-emerald-600 hover:bg-emerald-50" : "text-amber-600 hover:bg-amber-50"}`}

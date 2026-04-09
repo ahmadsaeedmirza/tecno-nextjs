@@ -21,7 +21,7 @@ type BackendProduct = {
   size?: string[];
   imageCover: string;
   isHidden?: "true" | "false" | boolean;
-  catagory?: {
+  category?: {
     _id: string;
     name: string;
     slug: string;
@@ -96,13 +96,13 @@ const ProductDetail = () => {
     );
   }, [product]);
 
-  const categoryName = product?.catagory?.name || "";
-  const categorySlug = product?.catagory?.slug || "";
-  const categoryId = product?.catagory?._id || "";
+  const categoryName = product?.category?.name || "";
+  const categorySlug = product?.category?.slug || "";
+  const categoryId = product?.category?._id || "";
 
   const contactHref = useMemo(() => {
     const params = new URLSearchParams();
-    if (categoryId) params.set("catagory", categoryId);
+    if (categoryId) params.set("category", categoryId);
     if (product?._id) params.set("product", product._id);
     const qs = params.toString();
     return `/contact${qs ? `?${qs}` : ""}`;
@@ -119,7 +119,7 @@ const ProductDetail = () => {
 
       try {
         const res = (await publicFetch(
-          `/api/v1/catagories/${encodeURIComponent(categorySlug)}/products?limit=10`,
+          `/api/v1/categories/${encodeURIComponent(categorySlug)}/products?limit=10`,
         )) as ApiListResponse<BackendProduct>;
 
         const items = (res?.data?.data ?? [])
@@ -130,8 +130,8 @@ const ProductDetail = () => {
             id: p._id,
             slug: p.slug,
             name: p.name,
-            category: p.catagory?.name || "",
-            categorySlug: p.catagory?.slug || "",
+            category: p.category?.name || "",
+            categorySlug: p.category?.slug || "",
             description: p.description,
             image: p.imageCover
               ? encodeUrlPathSegments(
@@ -179,7 +179,7 @@ const ProductDetail = () => {
     <div className="pt-24 pb-20">
       <div className="section-container">
         <Link
-          href={`/products/catagory?category=${encodeURIComponent(categorySlug)}`}
+          href={`/products/category/${encodeURIComponent(categorySlug)}`}
           className="text-muted-foreground text-sm hover:text-primary inline-flex items-center gap-1 mb-8 transition-colors"
         >
           <ArrowLeft className="w-3 h-3" /> {t("backTo")} {categoryName}

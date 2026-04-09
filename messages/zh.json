@@ -11,7 +11,8 @@
     "searchPlaceholder": "搜索产品...",
     "viewAll": "查看所有类别 →",
     "instruments": "件产品",
-    "language": "语言"
+    "language": "语言",
+    "events": "Exhibitions"
   },
   "Footer": {
     "description": "全球领先的精密手术器械制造商。通过ISO质量认证，致力于卓越的医疗保健服务。",
@@ -252,5 +253,16 @@
     "details": "查看详情",
     "sendInquiry": "发送咨询",
     "noProducts": "该分类下暂无产品。"
+  },
+  "Events": {
+    "badge": "GLOBAL REACH",
+    "title": "Exhibitions & Events",
+    "subtitle": "Join us around the globe as we showcase our latest in electrosurgical innovations and forge new partnerships.",
+    "upcomingTitle": "Upcoming Exhibitions",
+    "previousTitle": "Past Exhibitions",
+    "stall": "Stall No:",
+    "date": "Date:",
+    "noUpcoming": "There are currently no upcoming events scheduled. Please check back later or review our past events below.",
+    "heroBadge": "NEXT UPCOMING EVENT"
   }
 }

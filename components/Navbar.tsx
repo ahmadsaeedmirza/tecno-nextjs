@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Menu, X, Search, ChevronDown, Globe } from "lucide-react";
+import { Menu, X, ChevronDown, Globe } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import { Link, useRouter, usePathname } from "@/i18n/routing";
 import { API_BASE_URL, publicFetch } from "@/lib/api-client";
@@ -22,7 +22,6 @@ const languages = [
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
-  const [search, setSearch] = useState("");
   const [scrolled, setScrolled] = useState(false);
   const [showProducts, setShowProducts] = useState(false);
   const [showLang, setShowLang] = useState(false);
@@ -47,7 +46,7 @@ const Navbar = () => {
     async function loadCategories() {
       try {
         const res = (await publicFetch(
-          `/api/v1/catagories?limit=5000&sort=name`,
+          `/api/v1/categories?limit=5000&sort=name`,
         )) as {
           status: string;
           data?: { data?: any[] };
@@ -89,6 +88,7 @@ const Navbar = () => {
     { href: "/technology", label: t("technology") },
     { href: "/sustainability", label: t("sustainability") },
     { href: "/about", label: t("about") },
+    { href: "/events", label: t("events") },
     { href: "/feedback", label: t("feedback") },
     { href: "/contact", label: t("contact") },
   ];
@@ -161,7 +161,7 @@ const Navbar = () => {
                   {navCategories.map((cat) => (
                     <Link
                       key={cat.slug}
-                      href={`/products/catagory?category=${encodeURIComponent(cat.slug)}`}
+                      href={`/products/category/${encodeURIComponent(cat.slug)}`}
                       onClick={() => setShowProducts(false)}
                       className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-muted transition-colors group"
                     >
@@ -183,39 +183,21 @@ const Navbar = () => {
                       </div>
                     </Link>
                   ))}
-                  {navCategoriesTotal > 8 ? (
-                    <Link
-                      href="/products"
-                      onClick={() => setShowProducts(false)}
-                      className="col-span-2 text-center text-xs font-bold text-primary hover:underline mt-2 py-1"
-                    >
-                      {t("viewAll")}
-                    </Link>
-                  ) : null}
+                  <Link
+                    href="/products"
+                    onClick={() => setShowProducts(false)}
+                    className="col-span-2 text-center text-xs font-bold text-primary hover:underline mt-2 py-1"
+                  >
+                    {t("viewAll")}
+                  </Link>
                 </div>
               )}
             </div>
           ))}
         </nav>
 
-        {/* Search + Language */}
-        <div className="hidden lg:flex items-center gap-2">
-          <div className="relative group">
-            <div className="absolute inset-0 rounded-full bg-primary/10 opacity-0 group-focus-within:opacity-100 group-focus-within:scale-110 transition-all duration-500 blur-md" />
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-primary/60 group-focus-within:text-primary group-focus-within:scale-110 transition-all duration-300" />
-            <input
-              type="text"
-              placeholder={t("searchPlaceholder")}
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="relative w-36 focus:w-52 pl-9 pr-3 py-1.5 text-xs font-bold rounded-full bg-primary/5 border border-primary/20 text-foreground placeholder:text-primary/40 placeholder:font-bold focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/50 focus:bg-primary/10 transition-all duration-500 ease-out"
-            />
-            <div className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] font-medium text-primary/30 group-focus-within:opacity-0 transition-opacity pointer-events-none">
-              ⌘K
-            </div>
-          </div>
-
-          {/* Language Selector */}
+        {/* Language */}
+        <div className="hidden lg:flex items-center gap-2">          {/* Language Selector */}
           <div
             className="relative"
             onMouseEnter={handleLangEnter}

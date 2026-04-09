@@ -1,6 +1,6 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { TextReveal } from "@/components/ScrollReveal";
@@ -27,7 +27,7 @@ type BackendProduct = {
   code?: string;
   imageCover: string;
   isHidden?: "true" | "false" | boolean;
-  catagory?: {
+  category?: {
     _id: string;
     name: string;
     slug: string;
@@ -50,8 +50,8 @@ type ApiOneResponse<T> = {
 
 const ProductCategory = () => {
   const t = useTranslations("Products");
-  const searchParams = useSearchParams();
-  const categorySlug = searchParams.get("category") || "";
+  const params = useParams();
+  const categorySlug = (params.slug as string) || "";
 
   const [category, setCategory] = useState<BackendCategory | null>(null);
   const [backendProducts, setBackendProducts] = useState<BackendProduct[]>([]);
@@ -72,7 +72,7 @@ const ProductCategory = () => {
         setIsLoading(true);
 
         const categoryRes = (await publicFetch(
-          `/api/v1/catagories/slug/${encodeURIComponent(categorySlug)}`,
+          `/api/v1/categories/slug/${encodeURIComponent(categorySlug)}`,
         )) as ApiOneResponse<BackendCategory>;
 
         const found = categoryRes?.data?.data ?? null;
@@ -86,7 +86,7 @@ const ProductCategory = () => {
         }
 
         const productsRes = (await publicFetch(
-          `/api/v1/catagories/${encodeURIComponent(found.slug)}/products?limit=5000`,
+          `/api/v1/categories/${encodeURIComponent(found.slug)}/products?limit=5000`,
         )) as ApiListResponse<BackendProduct>;
 
         const productsForCategory = productsRes?.data?.data ?? [];
@@ -120,8 +120,8 @@ const ProductCategory = () => {
       id: p._id,
       slug: p.slug,
       name: p.name,
-      category: p.catagory?.name || "",
-      categorySlug: p.catagory?.slug || "",
+      category: p.category?.name || "",
+      categorySlug: p.category?.slug || "",
       description: p.description,
       image: p.imageCover
         ? encodeUrlPathSegments(`${API_BASE_URL}/products/${p.imageCover}`)

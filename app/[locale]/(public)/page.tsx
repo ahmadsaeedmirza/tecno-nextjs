@@ -47,7 +47,7 @@ type BackendProduct = {
   code?: string;
   imageCover: string;
   isHidden?: "true" | "false" | boolean;
-  catagory?: {
+  category?: {
     _id: string;
     name: string;
     slug: string;
@@ -143,15 +143,15 @@ const Index = () => {
     async function loadHomeData() {
       try {
         const [categoriesRes, productsRes, latestEventRes] = await Promise.all([
-          publicFetch(
-            "/api/v1/catagories?limit=50&sort=-_id",
-          ) as Promise<ApiListResponse<BackendCategory>>,
-          publicFetch(
-            "/api/v1/products?limit=5000&sort=-_id",
-          ) as Promise<ApiListResponse<BackendProduct>>,
-          publicFetch(
-            "/api/v1/events?limit=50&sort=-date",
-          ) as Promise<ApiListResponse<BackendEvent>>,
+          publicFetch("/api/v1/categories?isFeatured=true&limit=50&sort=-_id") as Promise<
+            ApiListResponse<BackendCategory>
+          >,
+          publicFetch("/api/v1/products?isFeatured=true&limit=5000&sort=-_id") as Promise<
+            ApiListResponse<BackendProduct>
+          >,
+          publicFetch("/api/v1/events?limit=50&sort=-date") as Promise<
+            ApiListResponse<BackendEvent>
+          >,
         ]);
 
         const backendCategories = (categoriesRes?.data?.data ?? []).filter(
@@ -166,21 +166,19 @@ const Index = () => {
         );
 
         const latest =
-          backendEvents
-            .slice()
-            .sort((a, b) => {
-              const aTime = Number.isFinite(Date.parse(a.date))
-                ? Date.parse(a.date)
-                : 0;
-              const bTime = Number.isFinite(Date.parse(b.date))
-                ? Date.parse(b.date)
-                : 0;
-              return bTime - aTime;
-            })[0] ?? null;
+          backendEvents.slice().sort((a, b) => {
+            const aTime = Number.isFinite(Date.parse(a.date))
+              ? Date.parse(a.date)
+              : 0;
+            const bTime = Number.isFinite(Date.parse(b.date))
+              ? Date.parse(b.date)
+              : 0;
+            return bTime - aTime;
+          })[0] ?? null;
 
         const productCountByCategorySlug = new Map<string, number>();
         for (const p of backendProducts) {
-          const slug = p.catagory?.slug;
+          const slug = p.category?.slug;
           if (!slug) continue;
           productCountByCategorySlug.set(
             slug,
@@ -207,8 +205,8 @@ const Index = () => {
             id: p._id,
             slug: p.slug,
             name: p.name,
-            category: p.catagory?.name || "",
-            categorySlug: p.catagory?.slug || "",
+            category: p.category?.name || "",
+            categorySlug: p.category?.slug || "",
             description: p.description,
             material: p.code || "",
             image: p.imageCover
@@ -424,7 +422,7 @@ const Index = () => {
             {categories.map((cat) => (
               <StaggerItem key={cat.slug}>
                 <Link
-                  href={`/products/catagory?category=${encodeURIComponent(cat.slug)}`}
+                  href={`/products/category/${encodeURIComponent(cat.slug)}`}
                   className="group block relative overflow-hidden rounded-xl aspect-square"
                 >
                   <img

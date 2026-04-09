@@ -11,7 +11,8 @@
     "searchPlaceholder": "Rechercher des produits...",
     "viewAll": "Voir toutes les catégories →",
     "instruments": "instruments",
-    "language": "Langue"
+    "language": "Langue",
+    "events": "Exhibitions"
   },
   "Footer": {
     "description": "Fabricant leader d'instruments chirurgicaux de précision à portée mondiale. Qualité certifiée ISO et engagement envers l'excellence des soins de santé.",
@@ -252,5 +253,16 @@
     "details": "Détails",
     "sendInquiry": "Envoyer une demande",
     "noProducts": "Aucun produit dans cette catégorie pour le moment."
+  },
+  "Events": {
+    "badge": "GLOBAL REACH",
+    "title": "Exhibitions & Events",
+    "subtitle": "Join us around the globe as we showcase our latest in electrosurgical innovations and forge new partnerships.",
+    "upcomingTitle": "Upcoming Exhibitions",
+    "previousTitle": "Past Exhibitions",
+    "stall": "Stall No:",
+    "date": "Date:",
+    "noUpcoming": "There are currently no upcoming events scheduled. Please check back later or review our past events below.",
+    "heroBadge": "NEXT UPCOMING EVENT"
   }
 }

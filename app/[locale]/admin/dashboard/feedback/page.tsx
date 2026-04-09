@@ -49,10 +49,13 @@ interface Feedback {
   createdAt: string;
 }
 
+type FilterType = "all" | "positive" | "negative";
+
 export default function AdminFeedbackPage() {
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [filterType, setFilterType] = useState<FilterType>("all");
   const [selectedFeedback, setSelectedFeedback] = useState<Feedback | null>(null);
   const { toast } = useToast();
 
@@ -87,10 +90,16 @@ export default function AdminFeedbackPage() {
     }
   };
 
-  const filteredFeedbacks = feedbacks.filter(f => 
-    f.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    f.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredFeedbacks = feedbacks.filter(f => {
+    const matchesSearch = f.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          f.email.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    let matchesFilter = true;
+    if (filterType === "positive") matchesFilter = f.averageRating > 3;
+    if (filterType === "negative") matchesFilter = f.averageRating <= 3;
+
+    return matchesSearch && matchesFilter;
+  });
 
   const RatingStars = ({ rating, size = "w-4 h-4" }: { rating: number, size?: string }) => {
     const fullStars = Math.floor(rating);
@@ -166,6 +175,15 @@ export default function AdminFeedbackPage() {
             className="w-full pl-11 pr-4 py-3 rounded-xl bg-white border border-slate-200 outline-none transition-all duration-200 focus:border-orange-200 focus:ring-4 focus:ring-orange-50"
           />
         </div>
+        <select
+          value={filterType}
+          onChange={(e) => setFilterType(e.target.value as FilterType)}
+          className="py-3 px-4 rounded-xl bg-white border border-slate-200 text-slate-600 outline-none focus:border-orange-200 focus:ring-4 focus:ring-orange-50 transition-all duration-200 cursor-pointer min-w-[160px]"
+        >
+          <option value="all">All Feedback</option>
+          <option value="positive">Positive (Avg &gt; 3)</option>
+          <option value="negative">Negative (Avg ≤ 3)</option>
+        </select>
       </div>
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden min-h-[400px] flex flex-col">

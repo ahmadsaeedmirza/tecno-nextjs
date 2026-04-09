@@ -22,7 +22,7 @@ type BackendCategory = {
 type BackendProduct = {
   _id: string;
   isHidden?: "true" | "false";
-  catagory?: {
+  category?: {
     _id: string;
     slug: string;
   };
@@ -54,7 +54,7 @@ const Products = () => {
         setIsLoading(true);
         const [categoriesRes, productsRes] = await Promise.all([
           publicFetch(
-            "/api/v1/catagories?isHidden=false&limit=1000&sort=name",
+            "/api/v1/categories?isHidden=false&limit=1000&sort=name",
           ) as Promise<ApiListResponse<BackendCategory>>,
           publicFetch("/api/v1/products?isHidden=false&limit=5000") as Promise<
             ApiListResponse<BackendProduct>
@@ -66,7 +66,7 @@ const Products = () => {
 
         const counts: Record<string, number> = {};
         for (const product of products) {
-          const catSlug = product.catagory?.slug;
+          const catSlug = product.category?.slug;
           if (!catSlug) continue;
           counts[catSlug] = (counts[catSlug] || 0) + 1;
         }
@@ -145,7 +145,7 @@ const Products = () => {
           {categories.map((cat) => (
             <StaggerItem key={cat.slug}>
               <Link
-                href={`/products/catagory?category=${encodeURIComponent(cat.slug)}`}
+                href={`/products/category/${encodeURIComponent(cat.slug)}`}
                 className="group block relative overflow-hidden rounded-2xl aspect-[3/4]"
               >
                 <img

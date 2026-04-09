@@ -11,7 +11,8 @@
     "searchPlaceholder": "उत्पाद खोजें...",
     "viewAll": "सभी श्रेणियां देखें →",
     "instruments": "उपकरण",
-    "language": "भाषा"
+    "language": "भाषा",
+    "events": "Exhibitions"
   },
   "Footer": {
     "description": "वैश्विक पहुंच के साथ सटीक सर्जिकल उपकरणों का अग्रणी निर्माता। आईएसओ प्रमाणित गुणवत्ता और बेहतर स्वास्थ्य सेवा के प्रति प्रतिबद्धता।",
@@ -252,5 +253,16 @@
     "details": "विवरण",
     "sendInquiry": "पूछताछ भेजें",
     "noProducts": "इस श्रेणी में अभी तक कोई उत्पाद नहीं है।"
+  },
+  "Events": {
+    "badge": "GLOBAL REACH",
+    "title": "Exhibitions & Events",
+    "subtitle": "Join us around the globe as we showcase our latest in electrosurgical innovations and forge new partnerships.",
+    "upcomingTitle": "Upcoming Exhibitions",
+    "previousTitle": "Past Exhibitions",
+    "stall": "Stall No:",
+    "date": "Date:",
+    "noUpcoming": "There are currently no upcoming events scheduled. Please check back later or review our past events below.",
+    "heroBadge": "NEXT UPCOMING EVENT"
   }
 }

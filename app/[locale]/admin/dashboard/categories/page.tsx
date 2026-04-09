@@ -13,6 +13,7 @@ import {
   Loader2,
   Upload,
   X,
+  Star,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
@@ -29,6 +30,7 @@ interface Category {
   name: string;
   description: string;
   isHidden: string;
+  isFeatured: string;
   imageCover: string;
   slug: string;
 }
@@ -51,7 +53,7 @@ export default function AdminCategoriesPage() {
   const fetchCategories = async () => {
     try {
       setIsLoading(true);
-      const res = await adminFetch("/api/v1/catagories");
+      const res = await adminFetch("/api/v1/categories");
       setCategories(res.data.data);
     } catch (err: any) {
       toast({
@@ -79,7 +81,7 @@ export default function AdminCategoriesPage() {
       if (formData.imageCover) data.append("imageCover", formData.imageCover);
 
       if (editingId) {
-        await adminFetch(`/api/v1/catagories/${editingId}`, {
+        await adminFetch(`/api/v1/categories/${editingId}`, {
           method: "PATCH",
           body: data,
         });
@@ -88,7 +90,7 @@ export default function AdminCategoriesPage() {
           description: "Category updated successfully!",
         });
       } else {
-        await adminFetch("/api/v1/catagories", {
+        await adminFetch("/api/v1/categories", {
           method: "POST",
           body: data,
         });
@@ -134,7 +136,7 @@ export default function AdminCategoriesPage() {
   const handleToggleHide = async (category: Category) => {
     const newStatus = category.isHidden === "true" ? "false" : "true";
     try {
-      await adminFetch(`/api/v1/catagories/${category._id}`, {
+      await adminFetch(`/api/v1/categories/${category._id}`, {
         method: "PATCH",
         body: { isHidden: newStatus },
       });
@@ -152,11 +154,32 @@ export default function AdminCategoriesPage() {
     }
   };
 
+  const handleToggleFeature = async (category: Category) => {
+    const newStatus = category.isFeatured === "true" ? "false" : "true";
+    try {
+      await adminFetch(`/api/v1/categories/${category._id}`, {
+        method: "PATCH",
+        body: { isFeatured: newStatus },
+      });
+      toast({
+        title: `Category ${newStatus === "true" ? "featured" : "unfeatured"}`,
+        description: `${category.name} has been updated.`,
+      });
+      fetchCategories();
+    } catch (err: any) {
+      toast({
+        variant: "destructive",
+        title: "Action failed",
+        description: err.message,
+      });
+    }
+  };
+
   const handleDelete = async (category: Category) => {
     if (!confirm(`Are you sure you want to delete ${category.name}?`)) return;
 
     try {
-      await adminFetch(`/api/v1/catagories/${category._id}`, {
+      await adminFetch(`/api/v1/categories/${category._id}`, {
         method: "DELETE",
       });
       toast({
@@ -387,19 +410,40 @@ export default function AdminCategoriesPage() {
                         </p>
                       </td>
                       <td className="px-6 py-4 hidden lg:table-cell">
-                        <div className="flex items-center gap-2">
-                          <span
-                            className={`w-1.5 h-1.5 rounded-full ${category.isHidden === "true" ? "bg-amber-400" : "bg-emerald-500"}`}
-                          />
-                          <span
-                            className={`text-xs font-semibold ${category.isHidden === "true" ? "text-amber-600" : "text-emerald-700"}`}
-                          >
-                            {category.isHidden === "true" ? "Hidden" : "Public"}
-                          </span>
+                        <div className="flex flex-col gap-1">
+                          <div className="flex items-center gap-2">
+                            <span
+                              className={`w-1.5 h-1.5 rounded-full ${category.isHidden === "true" ? "bg-amber-400" : "bg-emerald-500"}`}
+                            />
+                            <span
+                              className={`text-xs font-semibold ${category.isHidden === "true" ? "text-amber-600" : "text-emerald-700"}`}
+                            >
+                              {category.isHidden === "true" ? "Hidden" : "Public"}
+                            </span>
+                          </div>
+                          {category.isFeatured === "true" && (
+                            <div className="flex items-center gap-1.5">
+                              <Star className="w-3 h-3 text-orange-500 fill-orange-500" />
+                              <span className="text-[10px] font-bold text-orange-600 uppercase tracking-wider">
+                                Featured
+                              </span>
+                            </div>
+                          )}
                         </div>
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={() => handleToggleFeature(category)}
+                            className={`p-2 rounded-lg transition-colors ${category.isFeatured === "true" ? "text-orange-600 hover:bg-orange-50" : "text-slate-400 hover:text-orange-500 hover:bg-slate-50"}`}
+                            title={
+                              category.isFeatured === "true"
+                                ? "Unfeature Category"
+                                : "Feature Category"
+                            }
+                          >
+                            <Star className={`w-4 h-4 ${category.isFeatured === "true" ? "fill-current" : ""}`} />
+                          </button>
                           <button
                             onClick={() => handleToggleHide(category)}
                             className={`p-2 rounded-lg transition-colors ${category.isHidden === "true" ? "text-emerald-600 hover:bg-emerald-50" : "text-amber-600 hover:bg-amber-50"}`}

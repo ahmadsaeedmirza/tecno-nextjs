@@ -35,7 +35,7 @@ interface Inquiry {
   companyName?: string;
   country: string;
   message: string;
-  catagory: { name: string };
+  category: { name: string };
   product: { name: string };
   createdAt: string;
 }
@@ -151,7 +151,7 @@ export default function AdminInquiriesPage() {
                           </div>
                           <div className="flex items-center gap-1.5 text-[11px] text-slate-400 uppercase font-bold tracking-wider">
                             <Layers className="w-3 h-3" />
-                            {inquiry.catagory?.name || "Uncategorized"}
+                            {inquiry.category?.name || "Uncategorized"}
                           </div>
                         </div>
                       </td>
@@ -259,7 +259,7 @@ export default function AdminInquiriesPage() {
                     <p className="text-[9px] uppercase font-black text-blue-400 tracking-widest mb-1 flex items-center gap-1">
                       <Layers className="w-3 h-3" /> Category
                     </p>
-                    <p className="text-sm font-bold text-blue-900">{selectedInquiry.catagory?.name}</p>
+                    <p className="text-sm font-bold text-blue-900">{selectedInquiry.category?.name}</p>
                   </div>
                 </div>
 

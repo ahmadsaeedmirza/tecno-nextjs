@@ -31,7 +31,7 @@ interface Category {
 interface Product {
   _id: string;
   name: string;
-  catagory: string | { _id: string };
+  category: string | { _id: string };
 }
 
 const Contact = () => {
@@ -53,7 +53,7 @@ const Contact = () => {
     phone: "",
     companyName: "",
     country: "",
-    catagory: "",
+    category: "",
     product: "",
     message: "",
   });
@@ -64,7 +64,7 @@ const Contact = () => {
         setIsLoading(true);
         const [catRes, prodRes] = await Promise.all([
           fetch(
-            `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/v1/catagories`,
+            `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/v1/categories`,
           ).then((r) => r.json()),
           fetch(
             `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/v1/products`,
@@ -81,12 +81,12 @@ const Contact = () => {
     fetchData();
   }, []);
 
-  // Prefill catagory/product from query params: /contact?catagory=<id>&product=<id>
+  // Prefill category/product from query params: /contact?category=<id>&product=<id>
   useEffect(() => {
     if (didApplyPrefill) return;
     if (!categories.length || !products.length) return;
 
-    const prefillCat = searchParams.get("catagory") || "";
+    const prefillCat = searchParams.get("category") || "";
     const prefillProd = searchParams.get("product") || "";
 
     if (!prefillCat && !prefillProd) return;
@@ -96,16 +96,16 @@ const Contact = () => {
       : undefined;
 
     const catIdFromProduct = matchedProduct
-      ? typeof matchedProduct.catagory === "string"
-        ? matchedProduct.catagory
-        : matchedProduct.catagory?._id || ""
+      ? typeof matchedProduct.category === "string"
+        ? matchedProduct.category
+        : matchedProduct.category?._id || ""
       : "";
 
     const nextCat = prefillCat || catIdFromProduct;
 
     setFormData((prev) => ({
       ...prev,
-      catagory: nextCat || prev.catagory,
+      category: nextCat || prev.category,
     }));
 
     if (prefillProd) setPendingPrefillProductId(prefillProd);
@@ -121,7 +121,7 @@ const Contact = () => {
   // Apply product selection only after products are filtered by the chosen category.
   useEffect(() => {
     if (!pendingPrefillProductId) return;
-    if (!formData.catagory) return;
+    if (!formData.category) return;
     if (!filteredProducts.length) return;
 
     const existsInCategory = filteredProducts.some(
@@ -134,15 +134,15 @@ const Contact = () => {
       product: pendingPrefillProductId,
     }));
     setPendingPrefillProductId("");
-  }, [pendingPrefillProductId, filteredProducts, formData.catagory]);
+  }, [pendingPrefillProductId, filteredProducts, formData.category]);
 
   // Filter products when category changes
   useEffect(() => {
-    if (formData.catagory) {
+    if (formData.category) {
       const filtered = products.filter((p) => {
         const catId =
-          typeof p.catagory === "string" ? p.catagory : p.catagory?._id;
-        return catId === formData.catagory;
+          typeof p.category === "string" ? p.category : p.category?._id;
+        return catId === formData.category;
       });
       setFilteredProducts(filtered);
       // Reset product if it's not in the new category
@@ -152,7 +152,7 @@ const Contact = () => {
     } else {
       setFilteredProducts([]);
     }
-  }, [formData.catagory, products]);
+  }, [formData.category, products]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -181,7 +181,7 @@ const Contact = () => {
         phone: "",
         companyName: "",
         country: "",
-        catagory: "",
+        category: "",
         product: "",
         message: "",
       });
@@ -449,9 +449,9 @@ const Contact = () => {
                   </label>
                   <Select
                     required
-                    value={formData.catagory}
+                    value={formData.category}
                     onValueChange={(val) =>
-                      setFormData((prev) => ({ ...prev, catagory: val }))
+                      setFormData((prev) => ({ ...prev, category: val }))
                     }
                   >
                     <SelectTrigger className="w-full px-4 py-[11px] min-h-[46px] rounded-lg bg-transparent border-2 border-border text-foreground text-sm focus:ring-1 focus:ring-primary focus:border-primary relative z-0 appearance-none">
@@ -483,7 +483,7 @@ const Contact = () => {
                     onValueChange={(val) =>
                       setFormData((prev) => ({ ...prev, product: val }))
                     }
-                    disabled={!formData.catagory}
+                    disabled={!formData.category}
                   >
                     <SelectTrigger className="w-full px-4 py-[11px] min-h-[46px] rounded-lg bg-transparent border-2 border-border text-foreground text-sm focus:ring-1 focus:ring-primary focus:border-primary relative z-0 appearance-none">
                       <SelectValue
