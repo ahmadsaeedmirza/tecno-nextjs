@@ -62,7 +62,7 @@ exports.resizeProductImage = catchAsync(async (req, res, next) => {
     name: req.body.name,
     description: req.body.description,
     code: req.body.code,
-    catagory: req.body.catagory,
+    category: req.body.category,
     file: req.file ? req.file.originalname : "no file",
   });
 
@@ -106,6 +106,12 @@ exports.resizeProductImage = catchAsync(async (req, res, next) => {
 
   next();
 });
+
+exports.parseArrayFields = (req, res, next) => {
+  if (req.body.tip === "[]") req.body.tip = [];
+  if (req.body.size === "[]") req.body.size = [];
+  next();
+};
 
 exports.getProductBySlug = catchAsync(async (req, res, next) => {
   const slug = req.params.slug;

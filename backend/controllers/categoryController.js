@@ -1,7 +1,7 @@
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs/promises");
-const Catagory = require("./../models/catagoryModel");
+const Category = require("./../models/categoryModel");
 const Product = require("./../models/productModel");
 const factory = require("./factoryFunctions");
 const catchAsync = require("./../utlis/catchAsync");
@@ -24,10 +24,10 @@ const upload = multer({
 });
 
 // Middleware to handle single image upload for 'imageCover'
-exports.uploadCatagoryImage = upload.single("imageCover");
+exports.uploadCategoryImage = upload.single("imageCover");
 
 // Middleware to resize the uploaded image and save it
-exports.resizeCatagoryImage = catchAsync(async (req, res, next) => {
+exports.resizeCategoryImage = catchAsync(async (req, res, next) => {
   if (!req.file) return next();
 
   const extFromMime = (mime) => {
@@ -39,7 +39,7 @@ exports.resizeCatagoryImage = catchAsync(async (req, res, next) => {
   };
 
   const fileExt = extFromMime(req.file.mimetype);
-  req.body.imageCover = `catagory-${req.params.id || "new"}-${Date.now()}-cover.${fileExt}`;
+  req.body.imageCover = `category-${req.params.id || "new"}-${Date.now()}-cover.${fileExt}`;
 
   const uploadPath = path.join(
     __dirname,
@@ -53,11 +53,11 @@ exports.resizeCatagoryImage = catchAsync(async (req, res, next) => {
 });
 
 // Basic CRUD Operations using Factory Functions
-exports.getAllCatagories = factory.getAll(Catagory);
-exports.getCatagory = factory.getOne(Catagory);
+exports.getAllCategories = factory.getAll(Category);
+exports.getCategory = factory.getOne(Category);
 
-exports.getCatagoryBySlug = catchAsync(async (req, res, next) => {
-  const doc = await Catagory.findOne({ slug: req.params.slug });
+exports.getCategoryBySlug = catchAsync(async (req, res, next) => {
+  const doc = await Category.findOne({ slug: req.params.slug });
 
   if (!doc) {
     return next(new AppError("No document found with this slug", 404));
@@ -71,19 +71,19 @@ exports.getCatagoryBySlug = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.getProductsForCatagorySlug = catchAsync(async (req, res, next) => {
-  const catagory = await Catagory.findOne({ slug: req.params.slug });
+exports.getProductsForCategorySlug = catchAsync(async (req, res, next) => {
+  const category = await Category.findOne({ slug: req.params.slug });
 
-  if (!catagory) {
+  if (!category) {
     return next(new AppError("No category found with this slug", 404));
   }
 
   // Prevent overriding our base filter with a query string
   const queryStr = { ...req.query };
-  delete queryStr.catagory;
+  delete queryStr.category;
 
   const features = new APIFeatures(
-    Product.find({ catagory: catagory._id }),
+    Product.find({ category: category._id }),
     queryStr,
   )
     .filter()
@@ -102,6 +102,6 @@ exports.getProductsForCatagorySlug = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.createCatagory = factory.createOne(Catagory);
-exports.updateCatagory = factory.updateOne(Catagory);
-exports.deleteCatagory = factory.deleteOne(Catagory);
+exports.createCategory = factory.createOne(Category);
+exports.updateCategory = factory.updateOne(Category);
+exports.deleteCategory = factory.deleteOne(Category);

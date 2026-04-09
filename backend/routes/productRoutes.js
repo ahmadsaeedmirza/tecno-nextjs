@@ -12,6 +12,7 @@ router
     authController.protect,
     productController.uploadProductImage,
     productController.resizeProductImage,
+    productController.parseArrayFields,
     productController.createProduct,
   );
 
@@ -24,6 +25,7 @@ router
     authController.protect,
     productController.uploadProductImage,
     productController.resizeProductImage,
+    productController.parseArrayFields,
     productController.updateProduct,
   )
   .delete(authController.protect, productController.deleteProduct);

@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const slugify = require("slugify");
 
-const catagorySchema = new mongoose.Schema(
+const categorySchema = new mongoose.Schema(
   {
     name: {
       type: String,
@@ -24,6 +24,11 @@ const catagorySchema = new mongoose.Schema(
       default: "false",
       enum: ["true", "false"],
     },
+    isFeatured: {
+      type: String,
+      default: "false",
+      enum: ["true", "false"],
+    },
   },
   {
     toJSON: { virtuals: true },
@@ -31,12 +36,12 @@ const catagorySchema = new mongoose.Schema(
   },
 );
 
-catagorySchema.index({ slug: 1 });
+categorySchema.index({ slug: 1 });
 
-catagorySchema.pre("save", function () {
+categorySchema.pre("save", function () {
   this.slug = slugify(this.name, { lower: true });
 });
 
-const Catagory = mongoose.model("Catagory", catagorySchema);
+const Category = mongoose.model("Category", categorySchema);
 
-module.exports = Catagory;
+module.exports = Category;

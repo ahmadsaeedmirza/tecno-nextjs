@@ -25,9 +25,9 @@ const inquirySchema = new mongoose.Schema({
         type: String,
         required: [true, 'Please provide your country']
     },
-    catagory: {
+    category: {
         type: mongoose.Schema.ObjectId,
-        ref: 'Catagory',
+        ref: 'Category',
         required: [true, 'Please select a category']
     },
     product: {
@@ -52,7 +52,7 @@ const inquirySchema = new mongoose.Schema({
 // Populate category and product when querying
 inquirySchema.pre(/^find/, function() {
     this.populate({
-        path: 'catagory',
+        path: 'category',
         select: 'name'
     }).populate({
         path: 'product',

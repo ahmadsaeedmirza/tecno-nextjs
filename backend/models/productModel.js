@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const slugify = require("slugify");
-const Catagory = require("./catagoryModel");
+const Category = require("./categoryModel");
 
 const productSchema = new mongoose.Schema(
   {
@@ -30,9 +30,14 @@ const productSchema = new mongoose.Schema(
       default: "false",
       enum: ["true", "false"],
     },
-    catagory: {
+    isFeatured: {
+      type: String,
+      default: "false",
+      enum: ["true", "false"],
+    },
+    category: {
       type: mongoose.Schema.ObjectId,
-      ref: "Catagory",
+      ref: "Category",
     },
   },
   {
@@ -44,7 +49,7 @@ const productSchema = new mongoose.Schema(
 productSchema.index({ slug: 1 });
 
 productSchema.pre(/^find/, function () {
-  this.populate("catagory");
+  this.populate("category");
 });
 
 productSchema.pre("save", function () {

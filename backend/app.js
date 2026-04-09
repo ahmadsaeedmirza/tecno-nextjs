@@ -14,7 +14,7 @@ const globalErrorHandler = require("./controllers/errorController");
 const userRouter = require("./routes/userRoutes");
 const productRouter = require("./routes/productRoutes");
 const eventRouter = require("./routes/eventRoutes");
-const catagoryRouter = require("./routes/catagoryRoutes");
+const categoryRouter = require("./routes/categoryRoutes");
 const inquiryRouter = require("./routes/inquiryRoutes");
 const feedbackRouter = require("./routes/feedbackRoutes");
 
@@ -67,7 +67,7 @@ if (process.env.NODE_ENV === "development") {
 // app.use(xss());           // against XSS attacks
 
 // ── PREVENT PARAMETER POLLUTION ───────────────────────────────────────────────
-app.use(hpp({ whitelist: ["name", "isHidden", "catagory"] }));
+app.use(hpp({ whitelist: ["name", "isHidden", "category"] }));
 
 // ── COMPRESSION ───────────────────────────────────────────────────────────────
 app.use(compression());
@@ -76,7 +76,7 @@ app.use(compression());
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/products", productRouter);
 app.use("/api/v1/events", eventRouter);
-app.use("/api/v1/catagories", catagoryRouter);
+app.use("/api/v1/categories", categoryRouter);
 app.use("/api/v1/inquiries", inquiryRouter);
 app.use("/api/v1/feedbacks", feedbackRouter);
 
