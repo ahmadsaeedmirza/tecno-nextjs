@@ -20,7 +20,8 @@ import {
 } from "lucide-react";
 import ReviewsSection from "@/components/ReviewsSection";
 import InstrumentViewer3D from "@/components/InstrumentViewer3D";
-import { API_BASE_URL, publicFetch } from "@/lib/api-client";
+import { publicFetch, API_BASE_URL as BASE } from "@/lib/api-client";
+const API_BASE_URL = BASE || "http://localhost:8000";
 import { encodeUrlPathSegments } from "@/lib/utils";
 
 type ApiListResponse<T> = {
@@ -83,31 +84,9 @@ type HomeFeaturedProduct = {
   image: string;
 };
 
-const heroSlides = [
-  {
-    image: "/hero-slide-1.jpg",
-    title: "Our Manufacturing Facility",
-    subtitle: "State-of-the-art production in Sialkot, Pakistan",
-  },
-  {
-    image: "/hero-slide-2.jpg",
-    title: "Precision Instruments",
-    subtitle: "Crafted with German & Japanese surgical steel",
-  },
-  {
-    image: "/hero-slide-3.jpg",
-    title: "Artisan Craftsmanship",
-    subtitle: "Decades of expertise in every instrument",
-  },
-  {
-    image: "/hero-slide-4.jpg",
-    title: "Global Distribution",
-    subtitle: "Trusted in 80+ countries worldwide",
-  },
-];
 
-// Double the slides for seamless infinite loop
-const infiniteSlides = [...heroSlides, ...heroSlides];
+
+
 
 const Index = () => {
   const t = useTranslations("Home");
@@ -120,9 +99,9 @@ const Index = () => {
     HomeFeaturedProduct[]
   >([]);
   const [latestEvent, setLatestEvent] = useState<BackendEvent | null>(null);
-
-  // Marquee animation duration
-  const marqueeSpeed = 24; // seconds for one full cycle
+  // Marquee animation duration - dynamic based on item count
+  const [marqueeDuration, setMarqueeDuration] = useState(24);
+  const [infiniteSlides, setInfiniteSlides] = useState<any[]>([]);
 
   // Attempt to play video on mount (handles mobile autoplay restrictions)
   useEffect(() => {
@@ -142,7 +121,7 @@ const Index = () => {
 
     async function loadHomeData() {
       try {
-        const [categoriesRes, productsRes, latestEventRes] = await Promise.all([
+        const [categoriesRes, productsRes, latestEventRes, carouselsRes] = await Promise.all([
           publicFetch("/api/v1/categories?isFeatured=true&limit=50&sort=-_id") as Promise<
             ApiListResponse<BackendCategory>
           >,
@@ -151,6 +130,9 @@ const Index = () => {
           >,
           publicFetch("/api/v1/events?limit=50&sort=-date") as Promise<
             ApiListResponse<BackendEvent>
+          >,
+          publicFetch(`/api/v1/carousels?limit=100&sort=createdAt`) as Promise<
+            ApiListResponse<any>
           >,
         ]);
 
@@ -216,13 +198,52 @@ const Index = () => {
               : "/products/dummy.jpg",
           }));
 
+        // Dynamically create the carousel slides array
+        const rawItems = carouselsRes?.data?.data ?? [];
+        
+        const fetchedSlides = rawItems
+          .filter((s: any) => s.isHidden !== "true")
+          .map((s: any) => ({
+            image: s.imageCover?.startsWith("http") 
+              ? s.imageCover 
+              : encodeUrlPathSegments(`${API_BASE_URL}/carousels/${s.imageCover}`),
+            title: s.title,
+            subtitle: s.description,
+          }));
+
+        let finalSlides = [];
+        
+        if (fetchedSlides.length > 0) {
+          finalSlides = [...fetchedSlides];
+          
+          // Ensure at least 4 items for the marquee width logic
+          if (finalSlides.length < 4) {
+            const originalData = [...finalSlides];
+            while (finalSlides.length < 4) {
+              finalSlides = [...finalSlides, ...originalData];
+            }
+          }
+        } else {
+          finalSlides = [];
+        }
+
+        // Double array for seamless infinite marquee loop
+        const finalInfiniteSlides = [...finalSlides, ...finalSlides];
+
         if (!cancelled) {
+          setInfiniteSlides(finalInfiniteSlides);
+          // Set duration: 5 seconds per slide for a steady, lively drift
+          const calculatedDuration = Math.max(20, finalSlides.length * 5);
+          setMarqueeDuration(calculatedDuration);
+          
           setCategories(mappedCategories);
           setFeaturedProducts(mappedFeaturedProducts);
           setLatestEvent(latest);
         }
-      } catch {
+      } catch (error) {
+        console.error("Home data fetch error:", error);
         if (!cancelled) {
+          setInfiniteSlides([]);
           setCategories([]);
           setFeaturedProducts([]);
           setLatestEvent(null);
@@ -280,45 +301,47 @@ const Index = () => {
         )}
       </section>
 
-      {/* ===== INFINITE CARD CAROUSEL (MARQUEE) ===== */}
-      <section className="py-10 relative bg-muted/20 overflow-hidden">
-        <div className="relative">
-          <motion.div
-            className="flex gap-5"
-            animate={{ x: [0, `-${50}%`] }}
-            transition={{
-              x: {
-                duration: marqueeSpeed,
-                ease: "linear",
-                repeat: Infinity,
-                repeatType: "loop",
-              },
-            }}
-          >
-            {infiniteSlides.map((slide, i) => (
-              <div
-                key={i}
-                className="flex-shrink-0 w-[340px] sm:w-[400px] lg:w-[440px] rounded-xl overflow-hidden relative aspect-[16/10] shadow-lg"
-              >
-                <img
-                  src={slide.image}
-                  alt={slide.title}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 via-foreground/20 to-transparent" />
-                <div className="absolute bottom-4 left-4 right-4">
-                  <h3 className="font-display text-sm sm:text-base font-bold text-card mb-0.5">
-                    {slide.title}
-                  </h3>
-                  <p className="text-sm sm:text-xs text-card/75">
-                    {slide.subtitle}
-                  </p>
+      {/* ===== INFINITE CARD CAROUSEL (CONSTANT DRIFT MARQUEE) ===== */}
+      {infiniteSlides.length > 0 && (
+        <section className="py-10 relative bg-muted/20 overflow-hidden">
+          <div className="relative px-5">
+            <motion.div
+              className="flex gap-5 w-max flex-nowrap"
+              animate={{ x: [0, `-${50}%`] }}
+              transition={{
+                x: {
+                  duration: marqueeDuration,
+                  ease: "linear",
+                  repeat: Infinity,
+                  repeatType: "loop",
+                },
+              }}
+            >
+              {infiniteSlides.map((slide, i) => (
+                <div
+                  key={i}
+                  className="flex-shrink-0 w-[340px] sm:w-[400px] lg:w-[440px] rounded-xl overflow-hidden relative aspect-[16/10] shadow-lg transition-transform duration-300 hover:scale-[1.02]"
+                >
+                  <img
+                    src={slide.image}
+                    alt={slide.title}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 via-foreground/20 to-transparent" />
+                  <div className="absolute bottom-4 left-4 right-4">
+                    <h3 className="font-display text-sm sm:text-base font-bold text-card mb-0.5">
+                      {slide.title}
+                    </h3>
+                    <p className="text-sm sm:text-xs text-card/75">
+                      {slide.subtitle}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
+              ))}
+            </motion.div>
+          </div>
+        </section>
+      )}
 
       {/* ===== 3D VIEWER ===== */}
       <section className="relative py-10">

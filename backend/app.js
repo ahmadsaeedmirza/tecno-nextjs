@@ -17,6 +17,7 @@ const eventRouter = require("./routes/eventRoutes");
 const categoryRouter = require("./routes/categoryRoutes");
 const inquiryRouter = require("./routes/inquiryRoutes");
 const feedbackRouter = require("./routes/feedbackRoutes");
+const carouselRouter = require("./routes/carouselRoutes");
 
 const app = express();
 
@@ -79,6 +80,7 @@ app.use("/api/v1/events", eventRouter);
 app.use("/api/v1/categories", categoryRouter);
 app.use("/api/v1/inquiries", inquiryRouter);
 app.use("/api/v1/feedbacks", feedbackRouter);
+app.use("/api/v1/carousels", carouselRouter);
 
 // ── UNHANDLED ROUTES ──────────────────────────────────────────────────────────
 app.all(/.*/, (req, res, next) => {

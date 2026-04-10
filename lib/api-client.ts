@@ -1,7 +1,7 @@
 "use client";
 
-export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const base = process.env.NEXT_PUBLIC_API_URL;
+export const API_BASE_URL = (base && base !== "/" && base !== "") ? base : "http://localhost:8000";
 
 interface FetchOptions extends RequestInit {
   body?: any;
@@ -30,6 +30,7 @@ export async function adminFetch(endpoint: string, options: FetchOptions = {}) {
           ? JSON.stringify(options.body)
           : undefined,
     credentials: "include",
+    cache: "no-store",
   });
 
   if (!res.ok) {
@@ -60,6 +61,7 @@ export async function publicFetch(
           ? JSON.stringify(options.body)
           : undefined,
     credentials: "include",
+    cache: "no-store",
   });
 
   if (!res.ok) {

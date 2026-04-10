@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format, parseISO } from "date-fns";
+import { DeleteConfirmModal } from "@/components/admin/DeleteConfirmModal";
 import {
   Dialog,
   DialogContent,
@@ -59,8 +60,10 @@ export default function AdminFeedbackPage() {
   const [selectedFeedback, setSelectedFeedback] = useState<Feedback | null>(null);
   
   // New States for Pagination & Month Filter
-  const [selectedMonth, setSelectedMonth] = useState<string>("current");
+  const [selectedMonth, setSelectedMonth] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState(1);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const ITEMS_PER_PAGE = 25;
 
   const { toast } = useToast();
@@ -85,14 +88,19 @@ export default function AdminFeedbackPage() {
     fetchFeedbacks();
   }, []);
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this feedback?")) return;
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    setIsDeleting(true);
+
     try {
-      await adminFetch(`/api/v1/feedbacks/${id}`, { method: "DELETE" });
+      await adminFetch(`/api/v1/feedbacks/${deleteId}`, { method: "DELETE" });
       toast({ title: "Feedback deleted" });
       fetchFeedbacks();
+      setDeleteId(null);
     } catch (err: any) {
       toast({ title: "Deletion failed", description: err.message, variant: "destructive" });
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -319,7 +327,7 @@ export default function AdminFeedbackPage() {
                                 <Eye className="w-4 h-4" />
                               </button>
                               <button 
-                                onClick={() => handleDelete(f._id)}
+                                onClick={() => setDeleteId(f._id)}
                                 className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                                 title="Delete Feedback"
                               >
@@ -449,6 +457,14 @@ export default function AdminFeedbackPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <DeleteConfirmModal
+        isOpen={!!deleteId}
+        onClose={() => setDeleteId(null)}
+        onConfirm={handleDelete}
+        itemName="this feedback"
+        loading={isDeleting}
+      />
     </div>
   );
 }

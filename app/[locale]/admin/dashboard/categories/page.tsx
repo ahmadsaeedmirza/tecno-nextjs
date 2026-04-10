@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
+import { DeleteConfirmModal } from "@/components/admin/DeleteConfirmModal";
 import {
   Dialog,
   DialogContent,
@@ -42,6 +43,8 @@ export default function AdminCategoriesPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
@@ -175,24 +178,28 @@ export default function AdminCategoriesPage() {
     }
   };
 
-  const handleDelete = async (category: Category) => {
-    if (!confirm(`Are you sure you want to delete ${category.name}?`)) return;
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    setIsDeleting(true);
 
     try {
-      await adminFetch(`/api/v1/categories/${category._id}`, {
+      await adminFetch(`/api/v1/categories/${deleteId}`, {
         method: "DELETE",
       });
       toast({
         title: "Category deleted",
-        description: `${category.name} has been removed.`,
+        description: "The category has been removed.",
       });
       fetchCategories();
+      setDeleteId(null);
     } catch (err: any) {
       toast({
         variant: "destructive",
         title: "Deletion failed",
         description: err.message,
       });
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -467,7 +474,7 @@ export default function AdminCategoriesPage() {
                             <Edit className="w-4 h-4" />
                           </button>
                           <button
-                            onClick={() => handleDelete(category)}
+                            onClick={() => setDeleteId(category._id)}
                             className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                             title="Delete Category"
                           >
@@ -483,6 +490,13 @@ export default function AdminCategoriesPage() {
           </div>
         )}
       </div>
+      <DeleteConfirmModal
+        isOpen={!!deleteId}
+        onClose={() => setDeleteId(null)}
+        onConfirm={handleDelete}
+        itemName={categories.find(c => c._id === deleteId)?.name || "this category"}
+        loading={isDeleting}
+      />
     </div>
   );
 }

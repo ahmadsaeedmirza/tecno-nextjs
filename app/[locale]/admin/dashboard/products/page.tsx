@@ -16,9 +16,11 @@ import {
   X,
   Upload,
   Star,
+  Filter,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
+import { DeleteConfirmModal } from "@/components/admin/DeleteConfirmModal";
 import { encodeUrlPathSegments } from "@/lib/utils";
 import {
   Dialog,
@@ -56,6 +58,8 @@ export default function AdminProductsPage() {
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const { toast } = useToast();
 
   // Form State
@@ -264,24 +268,28 @@ export default function AdminProductsPage() {
     }
   };
 
-  const handleDelete = async (product: Product) => {
-    if (!confirm(`Are you sure you want to delete ${product.name}?`)) return;
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    setIsDeleting(true);
 
     try {
-      await adminFetch(`/api/v1/products/${product._id}`, {
+      await adminFetch(`/api/v1/products/${deleteId}`, {
         method: "DELETE",
       });
       toast({
         title: "Product deleted",
-        description: `${product.name} has been removed.`,
+        description: "The product has been removed.",
       });
       fetchInitialData();
+      setDeleteId(null);
     } catch (err: any) {
       toast({
         variant: "destructive",
         title: "Deletion failed",
         description: err.message,
       });
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -724,7 +732,7 @@ export default function AdminProductsPage() {
                             <Edit className="w-4 h-4" />
                           </button>
                           <button
-                            onClick={() => handleDelete(product)}
+                            onClick={() => setDeleteId(product._id)}
                             className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                             title="Delete Product"
                           >
@@ -740,6 +748,13 @@ export default function AdminProductsPage() {
           </div>
         )}
       </div>
+      <DeleteConfirmModal
+        isOpen={!!deleteId}
+        onClose={() => setDeleteId(null)}
+        onConfirm={handleDelete}
+        itemName={products.find(p => p._id === deleteId)?.name || "this product"}
+        loading={isDeleting}
+      />
     </div>
   );
 }

@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { adminFetch } from "@/lib/api-client";
+import { adminFetch, API_BASE_URL } from "@/lib/api-client";
+import { encodeUrlPathSegments } from "@/lib/utils";
 import {
-  Calendar,
+  MonitorPlay,
   Plus,
   Search,
   Eye,
@@ -11,36 +12,31 @@ import {
   Trash2,
   Edit,
   Loader2,
-  MapPin,
   Upload,
-  X,
-  Calendar as CalendarIcon,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
-import { format } from "date-fns";
 import { DeleteConfirmModal } from "@/components/admin/DeleteConfirmModal";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-interface Event {
+interface CarouselItem {
   _id: string;
-  name: string;
+  title: string;
   description: string;
   isHidden: string;
   imageCover: string;
-  date: string;
-  StallNo?: string;
-  slug: string;
+  createdAt: string;
 }
 
-export default function AdminEventsPage() {
-  const [events, setEvents] = useState<Event[]>([]);
+export default function AdminCarouselPage() {
+  const [carousels, setCarousels] = useState<CarouselItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -51,21 +47,19 @@ export default function AdminEventsPage() {
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
-    name: "",
+    title: "",
     description: "",
-    date: "",
-    StallNo: "",
     imageCover: null as File | null,
   });
 
-  const fetchEvents = async () => {
+  const fetchCarousels = async () => {
     try {
       setIsLoading(true);
-      const res = await adminFetch("/api/v1/events");
-      setEvents(res.data.data);
+      const res = await adminFetch("/api/v1/carousels?limit=100&sort=-createdAt");
+      setCarousels(res.data.data || []);
     } catch (err: any) {
       toast({
-        title: "Error fetching events",
+        title: "Error fetching carousels",
         description: err.message,
         variant: "destructive",
       });
@@ -75,7 +69,7 @@ export default function AdminEventsPage() {
   };
 
   useEffect(() => {
-    fetchEvents();
+    fetchCarousels();
   }, []);
 
   const handleAddSubmit = async (e: React.FormEvent) => {
@@ -84,36 +78,34 @@ export default function AdminEventsPage() {
 
     try {
       const data = new FormData();
-      data.append("name", formData.name);
+      data.append("title", formData.title);
       data.append("description", formData.description);
-      data.append("date", formData.date);
-      if (formData.StallNo) data.append("StallNo", formData.StallNo);
       if (formData.imageCover) data.append("imageCover", formData.imageCover);
 
       if (editingId) {
-        await adminFetch(`/api/v1/events/${editingId}`, {
+        await adminFetch(`/api/v1/carousels/${editingId}`, {
           method: "PATCH",
           body: data,
         });
-        toast({ title: "Success", description: "Event updated successfully!" });
+        toast({
+          title: "Success",
+          description: "Carousel slide updated successfully!",
+        });
       } else {
-        await adminFetch("/api/v1/events", {
+        await adminFetch("/api/v1/carousels", {
           method: "POST",
           body: data,
         });
-        toast({ title: "Success", description: "Event created successfully!" });
+        toast({
+          title: "Success",
+          description: "Carousel slide created successfully!",
+        });
       }
 
       setIsAddModalOpen(false);
       setEditingId(null);
-      setFormData({
-        name: "",
-        description: "",
-        date: "",
-        StallNo: "",
-        imageCover: null,
-      });
-      fetchEvents();
+      setFormData({ title: "", description: "", imageCover: null });
+      fetchCarousels();
     } catch (err: any) {
       toast({
         title: editingId ? "Update failed" : "Creation failed",
@@ -125,21 +117,11 @@ export default function AdminEventsPage() {
     }
   };
 
-  const openEditModal = (event: Event) => {
-    setEditingId(event._id);
-    let formattedDate = "";
-    if (event.date) {
-      try {
-        formattedDate = new Date(event.date).toISOString().split("T")[0];
-      } catch (e) {
-        formattedDate = String(event.date); // Fallback
-      }
-    }
+  const openEditModal = (carousel: CarouselItem) => {
+    setEditingId(carousel._id);
     setFormData({
-      name: event.name || "",
-      description: event.description || "",
-      date: formattedDate,
-      StallNo: event.StallNo || "",
+      title: carousel.title || "",
+      description: carousel.description || "",
       imageCover: null,
     });
     setIsAddModalOpen(true);
@@ -149,28 +131,22 @@ export default function AdminEventsPage() {
     setIsAddModalOpen(isOpen);
     if (!isOpen) {
       setEditingId(null);
-      setFormData({
-        name: "",
-        description: "",
-        date: "",
-        StallNo: "",
-        imageCover: null,
-      });
+      setFormData({ title: "", description: "", imageCover: null });
     }
   };
 
-  const handleToggleHide = async (event: Event) => {
-    const newStatus = event.isHidden === "true" ? "false" : "true";
+  const handleToggleHide = async (carousel: CarouselItem) => {
+    const newStatus = carousel.isHidden === "true" ? "false" : "true";
     try {
-      await adminFetch(`/api/v1/events/${event._id}`, {
+      await adminFetch(`/api/v1/carousels/${carousel._id}`, {
         method: "PATCH",
         body: { isHidden: newStatus },
       });
       toast({
-        title: `Event ${newStatus === "true" ? "hidden" : "visible"}`,
-        description: `${event.name} has been updated.`,
+        title: `Slide ${newStatus === "true" ? "hidden" : "visible"}`,
+        description: `${carousel.title} has been updated.`,
       });
-      fetchEvents();
+      fetchCarousels();
     } catch (err: any) {
       toast({
         variant: "destructive",
@@ -185,14 +161,14 @@ export default function AdminEventsPage() {
     setIsDeleting(true);
 
     try {
-      await adminFetch(`/api/v1/events/${deleteId}`, {
+      await adminFetch(`/api/v1/carousels/${deleteId}`, {
         method: "DELETE",
       });
       toast({
-        title: "Event deleted",
-        description: "The event has been removed.",
+        title: "Slide deleted",
+        description: "The carousel slide has been removed.",
       });
-      fetchEvents();
+      fetchCarousels();
       setDeleteId(null);
     } catch (err: any) {
       toast({
@@ -205,17 +181,17 @@ export default function AdminEventsPage() {
     }
   };
 
-  const filteredEvents = events.filter((e) =>
-    e.name.toLowerCase().includes(searchTerm.toLowerCase()),
+  const filteredCarousels = carousels.filter((c) =>
+    c.title.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-slate-800">Events</h1>
+          <h1 className="text-3xl font-bold text-slate-800">Hero Carousel</h1>
           <p className="text-slate-500 mt-1">
-            Manage exhibitions, trade shows, and company events
+            Manage the hero slides appearing on the homepage marquee
           </p>
         </div>
 
@@ -225,84 +201,50 @@ export default function AdminEventsPage() {
               className="flex items-center justify-center gap-2 px-6 py-3 gradient-button text-sm whitespace-nowrap"
               onClick={() => {
                 setEditingId(null);
-                setFormData({
-                  name: "",
-                  description: "",
-                  date: "",
-                  StallNo: "",
-                  imageCover: null,
-                });
+                setFormData({ title: "", description: "", imageCover: null });
               }}
             >
               <Plus className="w-4 h-4" />
-              Add New Event
+              Add New Slide
             </button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden rounded-2xl border-none shadow-2xl">
             <div className="bg-white p-8">
               <DialogHeader className="mb-6">
                 <DialogTitle className="text-2xl font-bold text-slate-800 flex items-center gap-2">
-                  <CalendarIcon className="w-6 h-6 text-orange-600" />
-                  {editingId ? "Edit Event" : "Add New Event"}
+                  <MonitorPlay className="w-6 h-6 text-orange-600" />
+                  {editingId ? "Edit Slide" : "Add New Slide"}
                 </DialogTitle>
+                <DialogDescription className="text-slate-500">
+                  {editingId ? "Update the details of your hero slide." : "Fill in the details to add a new slide to your homepage marquee."}
+                </DialogDescription>
               </DialogHeader>
 
               <form onSubmit={handleAddSubmit} className="space-y-5">
                 <div className="space-y-1.5">
                   <label className="text-sm font-semibold text-slate-700">
-                    Event Name
+                    Slide Title
                   </label>
                   <input
                     required
                     type="text"
-                    placeholder="e.g. Arab Health 2026"
+                    placeholder="e.g. Premium Manufacturing"
                     className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 outline-none transition-all focus:border-orange-500 focus:ring-4 focus:ring-orange-50 text-sm"
-                    value={formData.name}
+                    value={formData.title}
                     onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
+                      setFormData({ ...formData, title: e.target.value })
                     }
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <label className="text-sm font-semibold text-slate-700">
-                      Date
-                    </label>
-                    <input
-                      required
-                      type="date"
-                      className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 outline-none transition-all focus:border-orange-500 focus:ring-4 focus:ring-orange-50 text-sm"
-                      value={formData.date}
-                      onChange={(e) =>
-                        setFormData({ ...formData, date: e.target.value })
-                      }
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-sm font-semibold text-slate-700">
-                      Stall Number
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. B-40"
-                      className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 outline-none transition-all focus:border-orange-500 focus:ring-4 focus:ring-orange-50 text-sm"
-                      value={formData.StallNo}
-                      onChange={(e) =>
-                        setFormData({ ...formData, StallNo: e.target.value })
-                      }
-                    />
-                  </div>
-                </div>
-
                 <div className="space-y-1.5">
                   <label className="text-sm font-semibold text-slate-700">
-                    Description
+                    Subtitle / Description
                   </label>
                   <textarea
                     required
-                    rows={3}
-                    placeholder="Enter event details..."
+                    rows={2}
+                    placeholder="Enter slide subtitle..."
                     className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 outline-none transition-all focus:border-orange-500 focus:ring-4 focus:ring-orange-50 text-sm resize-none"
                     value={formData.description}
                     onChange={(e) =>
@@ -342,7 +284,7 @@ export default function AdminEventsPage() {
                       >
                         {formData.imageCover
                           ? formData.imageCover.name
-                          : "Click to upload event banner"}
+                          : "Click to upload slide image"}
                       </p>
                     </div>
                   </div>
@@ -356,12 +298,14 @@ export default function AdminEventsPage() {
                   {isSubmitting ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      {editingId ? "Updating Event..." : "Creating Event..."}
+                      {editingId
+                        ? "Updating Slide..."
+                        : "Creating Slide..."}
                     </>
                   ) : editingId ? (
-                    "Update Event"
+                    "Update Slide"
                   ) : (
-                    "Create Event"
+                    "Create Slide"
                   )}
                 </button>
               </form>
@@ -375,7 +319,7 @@ export default function AdminEventsPage() {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-orange-500 transition-colors" />
           <input
             type="text"
-            placeholder="Search events..."
+            placeholder="Search slides..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-11 pr-4 py-3 rounded-xl bg-white border border-slate-200 outline-none transition-all duration-200 focus:border-orange-200 focus:ring-4 focus:ring-orange-50"
@@ -383,9 +327,9 @@ export default function AdminEventsPage() {
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden min-h-[400px] flex flex-col">
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col min-h-[400px]">
         {isLoading ? (
-          <div className="flex-1 flex items-center justify-center">
+          <div className="flex-1 flex items-center justify-center min-h-[300px]">
             <Loader2 className="w-8 h-8 text-orange-600 animate-spin" />
           </div>
         ) : (
@@ -394,10 +338,10 @@ export default function AdminEventsPage() {
               <thead>
                 <tr className="bg-slate-50/50 border-b border-slate-200">
                   <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">
-                    Event
+                    Slide
                   </th>
                   <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider hidden md:table-cell">
-                    Date & Venue
+                    Description
                   </th>
                   <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider hidden lg:table-cell">
                     Status
@@ -408,99 +352,94 @@ export default function AdminEventsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {filteredEvents.length === 0 ? (
+                {filteredCarousels.length === 0 ? (
                   <tr>
                     <td colSpan={4} className="px-6 py-20 text-center">
                       <div className="flex flex-col items-center gap-3">
-                        <Calendar className="w-12 h-12 text-slate-200" />
+                        <MonitorPlay className="w-12 h-12 text-slate-200" />
                         <p className="text-slate-400 font-medium">
-                          No events found
+                          No slides found
                         </p>
                       </div>
                     </td>
                   </tr>
                 ) : (
-                  filteredEvents.map((event) => (
+                  filteredCarousels.map((carousel) => (
                     <tr
-                      key={event._id}
+                      key={carousel._id}
                       className="hover:bg-slate-50/50 transition-colors group"
                     >
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-4">
-                          <div className="w-14 h-14 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 flex-shrink-0 relative">
+                          <div className="w-24 h-14 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 flex-shrink-0 relative">
                             <Image
                               src={
-                                event.imageCover
-                                  ? event.imageCover.startsWith("http")
-                                    ? event.imageCover
-                                    : `/events/${event.imageCover}`
-                                  : "https://placehold.co/100x100?text=Event"
+                                carousel.imageCover
+                                  ? carousel.imageCover.startsWith("http")
+                                    ? carousel.imageCover
+                                    : encodeUrlPathSegments(`${API_BASE_URL}/carousels/${carousel.imageCover}`)
+                                  : "https://placehold.co/200x100?text=Slide"
                               }
-                              alt={event.name}
+                              alt={carousel.title}
                               fill
-                              className="object-cover"
+                              unoptimized
+                              className="object-contain"
                             />
                           </div>
                           <div>
-                            <p className="font-semibold text-slate-800 line-clamp-1">
-                              {event.name}
+                            <p className="font-semibold text-slate-800 line-clamp-1 w-48">
+                              {carousel.title}
                             </p>
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 hidden md:table-cell">
-                        <div className="space-y-1">
-                          <p className="text-sm font-medium text-slate-700">
-                            {format(new Date(event.date), "PPP")}
-                          </p>
-                          {event.StallNo && (
-                            <div className="flex items-center gap-1 text-xs text-slate-400">
-                              <MapPin className="w-3 h-3" />
-                              Stall: {event.StallNo}
-                            </div>
-                          )}
-                        </div>
+                      <td className="px-6 py-4 hidden md:table-cell max-w-xs">
+                        <p className="text-sm text-slate-500 line-clamp-2">
+                          {carousel.description}
+                        </p>
                       </td>
                       <td className="px-6 py-4 hidden lg:table-cell">
-                        <div className="flex items-center gap-2">
-                          <span
-                            className={`w-1.5 h-1.5 rounded-full ${event.isHidden === "true" ? "bg-amber-400" : "bg-emerald-500"}`}
-                          />
-                          <span
-                            className={`text-xs font-semibold ${event.isHidden === "true" ? "text-amber-600" : "text-emerald-700"}`}
-                          >
-                            {event.isHidden === "true" ? "Hidden" : "Public"}
-                          </span>
+                        <div className="flex flex-col gap-1">
+                          <div className="flex items-center gap-2">
+                            <span
+                              className={`w-1.5 h-1.5 rounded-full ${carousel.isHidden === "true" ? "bg-amber-400" : "bg-emerald-500"}`}
+                            />
+                            <span
+                              className={`text-xs font-semibold ${carousel.isHidden === "true" ? "text-amber-600" : "text-emerald-700"}`}
+                            >
+                              {carousel.isHidden === "true" ? "Hidden" : "Active"}
+                            </span>
+                          </div>
                         </div>
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                           <button
-                            onClick={() => handleToggleHide(event)}
-                            className={`p-2 rounded-lg transition-colors ${event.isHidden === "true" ? "text-emerald-600 hover:bg-emerald-50" : "text-amber-600 hover:bg-amber-50"}`}
+                            onClick={() => handleToggleHide(carousel)}
+                            className={`p-2 rounded-lg transition-colors ${carousel.isHidden === "true" ? "text-emerald-600 hover:bg-emerald-50" : "text-amber-600 hover:bg-amber-50"}`}
                             title={
-                              event.isHidden === "true"
-                                ? "Show Event"
-                                : "Hide Event"
+                              carousel.isHidden === "true"
+                                ? "Show Slide"
+                                : "Hide Slide"
                             }
                           >
-                            {event.isHidden === "true" ? (
+                            {carousel.isHidden === "true" ? (
                               <Eye className="w-4 h-4" />
                             ) : (
                               <EyeOff className="w-4 h-4" />
                             )}
                           </button>
                           <button
-                            onClick={() => openEditModal(event)}
+                            onClick={() => openEditModal(carousel)}
                             className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                            title="Edit Event"
+                            title="Edit Slide"
                           >
                             <Edit className="w-4 h-4" />
                           </button>
                           <button
-                            onClick={() => setDeleteId(event._id)}
+                            onClick={() => setDeleteId(carousel._id)}
                             className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                            title="Delete Event"
+                            title="Delete Slide"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -518,7 +457,7 @@ export default function AdminEventsPage() {
         isOpen={!!deleteId}
         onClose={() => setDeleteId(null)}
         onConfirm={handleDelete}
-        itemName={events.find(e => e._id === deleteId)?.name || "this event"}
+        itemName={carousels.find(c => c._id === deleteId)?.title || "this slide"}
         loading={isDeleting}
       />
     </div>

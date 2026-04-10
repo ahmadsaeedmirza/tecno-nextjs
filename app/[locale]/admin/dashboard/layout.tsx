@@ -2,17 +2,18 @@
 
 import { useState, useEffect } from "react";
 import { Link, useRouter, usePathname } from "@/i18n/routing";
-import { 
-  LayoutDashboard, 
-  Package, 
-  Layers, 
-  Calendar, 
-  LogOut, 
-  Menu, 
+import {
+  LayoutDashboard,
+  Package,
+  Layers,
+  Calendar,
+  LogOut,
+  Menu,
   X,
   ChevronRight,
   MessageSquare,
-  ClipboardList
+  ClipboardList,
+  MonitorPlay
 } from "lucide-react";
 import Image from "next/image";
 
@@ -39,6 +40,7 @@ export default function AdminDashboardLayout({
 
   const navItems = [
     { name: "Overview", href: "/admin/dashboard", icon: LayoutDashboard },
+    { name: "Carousel", href: "/admin/dashboard/carousel", icon: MonitorPlay },
     { name: "Products", href: "/admin/dashboard/products", icon: Package },
     { name: "Categories", href: "/admin/dashboard/categories", icon: Layers },
     { name: "Events", href: "/admin/dashboard/events", icon: Calendar },
@@ -55,7 +57,7 @@ export default function AdminDashboardLayout({
     <div className="min-h-screen bg-slate-50 flex">
       {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/50 z-40 lg:hidden backdrop-blur-sm transition-opacity"
           onClick={() => setIsSidebarOpen(false)}
         />
@@ -69,8 +71,7 @@ export default function AdminDashboardLayout({
       `}>
         <div className="h-full flex flex-col p-6">
           <div className="flex items-center gap-3 mb-10 px-2">
-            <img src="/tecno-logo.webp" alt="Tecno Industries" className="h-8 w-auto" />
-            <span className="font-bold text-xl text-slate-800 tracking-tight">Admin Panel</span>
+            <img src="/tecno-logo.webp" alt="Tecno Industries" className="h-16 w-auto" />
           </div>
 
           <nav className="flex-1 space-y-2">
@@ -84,8 +85,8 @@ export default function AdminDashboardLayout({
                   onClick={() => setIsSidebarOpen(false)}
                   className={`
                     flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group
-                    ${isActive 
-                      ? "bg-orange-50 text-orange-600 font-semibold shadow-sm shadow-orange-100" 
+                    ${isActive
+                      ? "bg-orange-50 text-orange-600 font-semibold shadow-sm shadow-orange-100"
                       : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
                     }
                   `}
@@ -98,7 +99,7 @@ export default function AdminDashboardLayout({
             })}
           </nav>
 
-          <button 
+          <button
             onClick={handleLogout}
             className="mt-auto flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all duration-200"
           >
@@ -112,20 +113,25 @@ export default function AdminDashboardLayout({
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Header */}
         <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 lg:px-10 sticky top-0 z-30">
-          <button 
+          <button
             onClick={() => setIsSidebarOpen(true)}
             className="lg:hidden p-2 hover:bg-slate-100 rounded-lg text-slate-600"
           >
             <Menu className="w-6 h-6" />
           </button>
 
-          <div className="flex items-center gap-4 ml-auto">
-            <div className="text-right hidden sm:block">
-              <p className="text-sm font-semibold text-slate-800">Admin</p>
-              <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Super Administrator</p>
+          <div className="flex items-center justify-between gap-4 w-full">
+            <div>
+              <span className="font-bold text-xl text-slate-800 tracking-tight">Admin Panel</span>
             </div>
-            <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center">
-              <span className="text-sm font-bold text-slate-600">A</span>
+            <div className="flex items-center gap-4">
+              <div className="text-right hidden sm:block">
+                <p className="text-sm font-semibold text-slate-800">Admin</p>
+                <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Super Administrator</p>
+              </div>
+              <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center">
+                <span className="text-sm font-bold text-slate-600">A</span>
+              </div>
             </div>
           </div>
         </header>

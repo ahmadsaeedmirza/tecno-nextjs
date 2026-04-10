@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format, parseISO } from "date-fns";
+import { DeleteConfirmModal } from "@/components/admin/DeleteConfirmModal";
 import {
   Dialog,
   DialogContent,
@@ -49,6 +50,8 @@ export default function AdminInquiriesPage() {
   // New States for Pagination & Month Filter
   const [selectedMonth, setSelectedMonth] = useState<string>("current");
   const [currentPage, setCurrentPage] = useState(1);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const ITEMS_PER_PAGE = 25;
 
   const { toast } = useToast();
@@ -73,14 +76,19 @@ export default function AdminInquiriesPage() {
     fetchInquiries();
   }, []);
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this inquiry?")) return;
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    setIsDeleting(true);
+
     try {
-      await adminFetch(`/api/v1/inquiries/${id}`, { method: "DELETE" });
+      await adminFetch(`/api/v1/inquiries/${deleteId}`, { method: "DELETE" });
       toast({ title: "Inquiry deleted" });
       fetchInquiries();
+      setDeleteId(null);
     } catch (err: any) {
       toast({ title: "Deletion failed", description: err.message, variant: "destructive" });
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -252,7 +260,7 @@ export default function AdminInquiriesPage() {
                                 <Eye className="w-4 h-4" />
                               </button>
                               <button 
-                                onClick={() => handleDelete(inquiry._id)}
+                                onClick={() => setDeleteId(inquiry._id)}
                                 className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                                 title="Delete Inquiry"
                               >
@@ -388,6 +396,14 @@ export default function AdminInquiriesPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <DeleteConfirmModal
+        isOpen={!!deleteId}
+        onClose={() => setDeleteId(null)}
+        onConfirm={handleDelete}
+        itemName="this inquiry"
+        loading={isDeleting}
+      />
     </div>
   );
 }
