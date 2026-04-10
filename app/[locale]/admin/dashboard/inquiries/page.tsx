@@ -251,9 +251,12 @@ export default function AdminInquiriesPage() {
                             </div>
                           </td>
                           <td className="px-6 py-4">
-                            <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div className="flex items-center justify-end gap-2 whitespace-nowrap relative z-10">
                               <button 
-                                onClick={() => setSelectedInquiry(inquiry)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedInquiry(inquiry);
+                                }}
                                 className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                                 title="View Message"
                               >
@@ -266,6 +269,28 @@ export default function AdminInquiriesPage() {
                               >
                                 <Trash2 className="w-4 h-4" />
                               </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    const subject = `Re: Inquiry about ${inquiry.product?.name || "TECNO Instruments"}`;
+                                    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${inquiry.email}&su=${encodeURIComponent(subject)}`;
+                                    
+                                    try {
+                                      navigator.clipboard.writeText(inquiry.email);
+                                    } catch (err) {}
+                                    
+                                    window.open(gmailUrl, '_blank');
+
+                                    toast({
+                                      title: "Opening Gmail",
+                                      description: `Redirecting to compose mail to ${inquiry.email}`,
+                                    });
+                                  }}
+                                  className="p-2 text-orange-600 hover:bg-orange-50 rounded-lg transition-colors border-none bg-transparent cursor-pointer"
+                                  title="Copy Email & Reply"
+                                >
+                                  <Mail className="w-4 h-4" />
+                                </button>
                             </div>
                           </td>
                         </tr>

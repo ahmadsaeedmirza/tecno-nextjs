@@ -364,11 +364,36 @@ export default function AdminFeedbackPage() {
                                 <Eye className="w-4 h-4" />
                               </button>
                               <button 
-                                onClick={() => setDeleteId(f._id)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setDeleteId(f._id);
+                                }}
                                 className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                                 title="Delete Feedback"
                               >
                                 <Trash2 className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const subject = `Re: Your Feedback on TECNO Instruments`;
+                                  const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${f.email}&su=${encodeURIComponent(subject)}`;
+                                  
+                                  try {
+                                    navigator.clipboard.writeText(f.email);
+                                  } catch (err) {}
+                                  
+                                  window.open(gmailUrl, '_blank');
+
+                                  toast({
+                                    title: "Opening Gmail",
+                                    description: `Redirecting to compose mail to ${f.email}`,
+                                  });
+                                }}
+                                className="p-2 text-orange-600 hover:bg-orange-50 rounded-lg transition-colors border-none bg-transparent cursor-pointer"
+                                title="Copy Email & Reply"
+                              >
+                                <Mail className="w-4 h-4" />
                               </button>
                             </div>
                           </td>

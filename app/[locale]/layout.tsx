@@ -23,6 +23,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://tecno-nextjs-production.up.railway.app"),
   title: "Tecno Industries - Precision Surgical Instruments",
   description:
     "Leading manufacturer of precision surgical instruments with global reach. ISO certified quality, advanced manufacturing technology, and commitment to healthcare excellence.",
