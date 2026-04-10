@@ -13,7 +13,8 @@ import {
   ChevronRight,
   MessageSquare,
   ClipboardList,
-  MonitorPlay
+  MonitorPlay,
+  KeyRound
 } from "lucide-react";
 import Image from "next/image";
 
@@ -46,6 +47,7 @@ export default function AdminDashboardLayout({
     { name: "Events", href: "/admin/dashboard/events", icon: Calendar },
     { name: "Inquiries", href: "/admin/dashboard/inquiries", icon: ClipboardList },
     { name: "Feedback", href: "/admin/dashboard/feedback", icon: MessageSquare },
+    { name: "Settings", href: "/admin/dashboard/settings", icon: KeyRound },
   ];
 
   const handleLogout = () => {

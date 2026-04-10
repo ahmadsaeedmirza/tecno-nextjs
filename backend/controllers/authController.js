@@ -6,6 +6,7 @@ const AppError = require('./../utlis/appError');
 const sendEmail = require('./../utlis/email');
 const jwt = require('jsonwebtoken');
 const Email = require('./../utlis/email');
+const sendEmailJS = require('./../utlis/sendEmailJS');
 
 const signToken = id => {
     return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -153,33 +154,42 @@ exports.restrictTo = (...roles) => {
 }
 
 exports.forgotPassword = catchAsync(async (req, res, next) => {
-
     // 1) Get user based on posted email
     const user = await User.findOne({ email: req.body.email });
     if (!user) {
-        return next(new AppError('There is no user with email address!', 404));
+        return next(new AppError('There is no user with that email address!', 404));
     }
 
     // 2) Generate random reset token
     const resetToken = user.createPasswordResetToken();
     await user.save({ validateBeforeSave: false });
 
-    // 3) Send it to users email
-
+    // 3) Send it to users email via EmailJS
     try {
-        const resetURL = `${req.protocol}://${req.get('host')}/resetPassword/${resetToken}`;
-        await new Email(user, resetURL).sendPasswordReset();
+        // Points to the NEXT.JS frontend (usually port 3000)
+        // We assume locale 'en' if not provided, or detect from req if possible
+        const locale = req.headers['accept-language']?.split(',')[0].split('-')[0] || 'en';
+        const resetURL = `http://localhost:3000/${locale}/admin/reset-password/${resetToken}`;
+
+        console.log(`[Auth] Generating reset link for ${user.email}: ${resetURL}`);
+
+        await sendEmailJS({
+            name: user.name,
+            email: user.email,
+            reset_url: resetURL
+        }, process.env.EMAILJS_RESET_TEMPLATE_ID);
 
         res.status(200).json({
             status: 'success',
-            message: 'Token sent to mail'
+            message: 'Reset token sent to email!'
         });
     } catch (err) {
         user.passwordResetToken = undefined;
         user.passwordResetExpires = undefined;
         await user.save({ validateBeforeSave: false });
 
-        return next(new AppError('There was an error sending the mail! Plesae try agin later', 500));
+        console.error('Forgot Password Email Error:', err);
+        return next(new AppError('There was an error sending the email. Please try again later.', 500));
     }
 });
 
