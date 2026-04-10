@@ -47,6 +47,7 @@ const productSchema = new mongoose.Schema(
 );
 
 productSchema.index({ slug: 1 });
+productSchema.index({ isFeatured: 1, isHidden: 1 });
 
 productSchema.pre(/^find/, function () {
   this.populate("category");

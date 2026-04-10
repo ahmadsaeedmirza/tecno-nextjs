@@ -123,19 +123,19 @@ const Index = () => {
     async function loadHomeData() {
       try {
         const [categoriesRes, productsRes, latestEventRes, carouselsRes, feedbacksRes] = await Promise.all([
-          publicFetch("/api/v1/categories?isFeatured=true&limit=50&sort=-_id") as Promise<
+          publicFetch("/api/v1/categories?isFeatured=true&limit=8&fields=name,slug,imageCover") as Promise<
             ApiListResponse<BackendCategory>
           >,
-          publicFetch("/api/v1/products?isFeatured=true&limit=5000&sort=-_id") as Promise<
+          publicFetch("/api/v1/products?isFeatured=true&limit=12&fields=name,slug,imageCover,category") as Promise<
             ApiListResponse<BackendProduct>
           >,
-          publicFetch("/api/v1/events?limit=50&sort=-date") as Promise<
+          publicFetch("/api/v1/events?limit=5&sort=-date&fields=name,slug,imageCover,date") as Promise<
             ApiListResponse<BackendEvent>
           >,
-          publicFetch(`/api/v1/carousels?limit=100&sort=createdAt`) as Promise<
+          publicFetch(`/api/v1/carousels?limit=10&sort=createdAt&fields=image,title,description,link`) as Promise<
             ApiListResponse<any>
           >,
-          publicFetch(`/api/v1/feedbacks?isHidden=false&sort=-createdAt`) as Promise<
+          publicFetch(`/api/v1/feedbacks?isHidden=false&sort=-createdAt&limit=10&fields=name,message,averageRating,role,country`) as Promise<
             ApiListResponse<any>
           >,
         ]);

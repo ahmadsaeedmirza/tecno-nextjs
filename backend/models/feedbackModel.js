@@ -45,6 +45,8 @@ const feedbackSchema = new mongoose.Schema({
     toObject: { virtuals: true }
 });
 
+feedbackSchema.index({ isHidden: 1, createdAt: -1 });
+
 // Calculate averageRating before saving
 feedbackSchema.pre('save', function () {
     const ratings = [

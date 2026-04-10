@@ -37,6 +37,7 @@ const categorySchema = new mongoose.Schema(
 );
 
 categorySchema.index({ slug: 1 });
+categorySchema.index({ isFeatured: 1, isHidden: 1 });
 
 categorySchema.pre("save", function () {
   this.slug = slugify(this.name, { lower: true });
