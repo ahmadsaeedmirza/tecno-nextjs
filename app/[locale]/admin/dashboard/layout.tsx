@@ -68,9 +68,7 @@ export default function AdminDashboardLayout({
       `}>
         <div className="h-full flex flex-col p-6">
           <div className="flex items-center gap-3 mb-10 px-2">
-            <div className="w-10 h-10 rounded-xl bg-orange-600 flex items-center justify-center text-white font-bold text-xl">
-              T
-            </div>
+            <img src="/tecno-logo.webp" alt="Tecno Industries" className="h-8 w-auto" />
             <span className="font-bold text-xl text-slate-800 tracking-tight">Admin Panel</span>
           </div>
 

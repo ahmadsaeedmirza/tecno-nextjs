@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { adminFetch } from "@/lib/api-client";
 import { 
   MessageSquare, 
@@ -19,7 +19,7 @@ import {
   X
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import {
   Dialog,
   DialogContent,
@@ -45,6 +45,12 @@ export default function AdminInquiriesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedInquiry, setSelectedInquiry] = useState<Inquiry | null>(null);
+  
+  // New States for Pagination & Month Filter
+  const [selectedMonth, setSelectedMonth] = useState<string>("current");
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 25;
+
   const { toast } = useToast();
 
   const fetchInquiries = async () => {
@@ -78,11 +84,45 @@ export default function AdminInquiriesPage() {
     }
   };
 
-  const filteredInquiries = inquiries.filter(i => 
-    i.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    i.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    i.product?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+  const availableMonths = useMemo(() => {
+    const months = new Set<string>();
+    inquiries.forEach(i => {
+      if (i.createdAt) months.add(format(new Date(i.createdAt), "yyyy-MM"));
+    });
+    return Array.from(months).sort().reverse();
+  }, [inquiries]);
+
+  const processedInquiries = useMemo(() => {
+    let result = inquiries.filter(i => {
+      const matchesSearch = 
+        i.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        i.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (i.product?.name?.toLowerCase() || "").includes(searchTerm.toLowerCase());
+      
+      let matchesMonth = true;
+      if (selectedMonth !== "all") {
+        const itemMonth = i.createdAt ? format(new Date(i.createdAt), "yyyy-MM") : "";
+        const targetMonth = selectedMonth === "current" ? format(new Date(), "yyyy-MM") : selectedMonth;
+        matchesMonth = itemMonth === targetMonth;
+      }
+
+      return matchesSearch && matchesMonth;
+    });
+
+    // Sort descending by date
+    result.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+    return result;
+  }, [inquiries, searchTerm, selectedMonth]);
+
+  const totalPages = Math.ceil(processedInquiries.length / ITEMS_PER_PAGE) || 1;
+  const paginatedInquiries = processedInquiries.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
   );
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedMonth]);
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -104,11 +144,27 @@ export default function AdminInquiriesPage() {
             className="w-full pl-11 pr-4 py-3 rounded-xl bg-white border border-slate-200 outline-none transition-all duration-200 focus:border-orange-200 focus:ring-4 focus:ring-orange-50"
           />
         </div>
+        <select
+          value={selectedMonth}
+          onChange={(e) => setSelectedMonth(e.target.value)}
+          className="py-3 px-4 rounded-xl bg-white border border-slate-200 text-slate-600 outline-none focus:border-orange-200 focus:ring-4 focus:ring-orange-50 transition-all duration-200 cursor-pointer min-w-[170px]"
+        >
+          <option value="current">Current Month</option>
+          <option value="all">All Months</option>
+          {availableMonths.map(m => {
+            const date = parseISO(`${m}-01`);
+            return (
+              <option key={m} value={m}>
+                {format(date, "MMMM yyyy")}
+              </option>
+            );
+          })}
+        </select>
       </div>
 
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden min-h-[400px] flex flex-col">
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
         {isLoading ? (
-          <div className="flex-1 flex items-center justify-center">
+          <div className="flex items-center justify-center py-40">
             <Loader2 className="w-8 h-8 text-orange-600 animate-spin" />
           </div>
         ) : (
@@ -123,67 +179,115 @@ export default function AdminInquiriesPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {filteredInquiries.length === 0 ? (
+                {paginatedInquiries.length === 0 ? (
                   <tr>
                     <td colSpan={4} className="px-6 py-20 text-center">
                       <div className="flex flex-col items-center gap-3">
-                        <MessageSquare className="w-12 h-12 text-slate-200" />
-                        <p className="text-slate-400 font-medium">No inquiries found</p>
+                        {selectedMonth !== "all" && processedInquiries.length === 0 && inquiries.length > 0 ? (
+                           <>
+                              <Calendar className="w-12 h-12 text-slate-200" />
+                              <p className="text-slate-400 font-medium">No inquiries found for the selected month</p>
+                           </>
+                        ) : (
+                           <>
+                              <MessageSquare className="w-12 h-12 text-slate-200" />
+                              <p className="text-slate-400 font-medium">No inquiries found</p>
+                           </>
+                        )}
                       </div>
                     </td>
                   </tr>
                 ) : (
-                  filteredInquiries.map((inquiry) => (
-                    <tr key={inquiry._id} className="hover:bg-slate-50/50 transition-colors group">
-                      <td className="px-6 py-4">
-                        <div className="space-y-1">
-                          <p className="font-semibold text-slate-800 line-clamp-1">{inquiry.name}</p>
-                          <p className="text-xs text-slate-400 flex items-center gap-1">
-                            <Mail className="w-3 h-3" /> {inquiry.email}
-                          </p>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 hidden md:table-cell">
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-1.5 text-sm text-slate-700 font-medium">
-                            <Package className="w-3.5 h-3.5 text-orange-500" />
-                            {inquiry.product?.name || "Unknown Product"}
-                          </div>
-                          <div className="flex items-center gap-1.5 text-[11px] text-slate-400 uppercase font-bold tracking-wider">
-                            <Layers className="w-3 h-3" />
-                            {inquiry.category?.name || "Uncategorized"}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 hidden lg:table-cell">
-                        <div className="flex items-center gap-2 text-sm text-slate-500">
-                          <Calendar className="w-4 h-4 text-slate-300" />
-                          {format(new Date(inquiry.createdAt), "MMM d, yyyy")}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button 
-                            onClick={() => setSelectedInquiry(inquiry)}
-                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                            title="View Message"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </button>
-                          <button 
-                            onClick={() => handleDelete(inquiry._id)}
-                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                            title="Delete Inquiry"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
+                  paginatedInquiries.map((inquiry, i) => {
+                    const currentMonthStr = format(new Date(inquiry.createdAt), "MMMM yyyy");
+                    const prevMonthStr = i > 0 ? format(new Date(paginatedInquiries[i-1].createdAt), "MMMM yyyy") : null;
+                    const showHeader = currentMonthStr !== prevMonthStr;
+
+                    return (
+                      <React.Fragment key={inquiry._id}>
+                        {showHeader && (
+                          <tr className="bg-orange-50/30 border-y border-orange-100/50">
+                            <td colSpan={4} className="px-6 py-2.5">
+                              <div className="flex items-center gap-2 text-orange-700 font-bold text-xs uppercase tracking-widest">
+                                <Calendar className="w-3.5 h-3.5 text-orange-500" />
+                                {currentMonthStr}
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                        <tr className="hover:bg-slate-50/50 transition-colors group">
+                          <td className="px-6 py-4">
+                            <div className="space-y-1">
+                              <p className="font-semibold text-slate-800 line-clamp-1">{inquiry.name}</p>
+                              <p className="text-xs text-slate-400 flex items-center gap-1">
+                                <Mail className="w-3 h-3" /> {inquiry.email}
+                              </p>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 hidden md:table-cell">
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-1.5 text-sm text-slate-700 font-medium">
+                                <Package className="w-3.5 h-3.5 text-orange-500" />
+                                {inquiry.product?.name || "Unknown Product"}
+                              </div>
+                              <div className="flex items-center gap-1.5 text-[11px] text-slate-400 uppercase font-bold tracking-wider">
+                                <Layers className="w-3 h-3" />
+                                {inquiry.category?.name || "Uncategorized"}
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 hidden lg:table-cell">
+                            <div className="flex items-center gap-2 text-sm text-slate-500">
+                              <Calendar className="w-4 h-4 text-slate-300" />
+                              {format(new Date(inquiry.createdAt), "MMM d, yyyy")}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button 
+                                onClick={() => setSelectedInquiry(inquiry)}
+                                className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                title="View Message"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </button>
+                              <button 
+                                onClick={() => handleDelete(inquiry._id)}
+                                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                title="Delete Inquiry"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      </React.Fragment>
+                    );
+                  })
                 )}
               </tbody>
             </table>
+          </div>
+        )}
+        {!isLoading && totalPages > 1 && (
+          <div className="flex items-center justify-between p-4 border-t border-slate-100 bg-slate-50/50">
+            <button
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              Previous
+            </button>
+            <span className="text-sm font-medium text-slate-500">
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              Next
+            </button>
           </div>
         )}
       </div>
