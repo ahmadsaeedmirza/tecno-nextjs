@@ -4,13 +4,12 @@ const authController = require("./../controllers/authController");
 
 const router = express.Router();
 
-// Public: Submit feedback
+// Public: Submit and list feedback
+router.route("/").get(feedbackController.getAllFeedbacks);
 router.post("/", feedbackController.createFeedback);
 
 // Protect all routes below (Login Only)
 router.use(authController.protect);
-
-router.route("/").get(feedbackController.getAllFeedbacks);
 
 router
   .route("/:id")
