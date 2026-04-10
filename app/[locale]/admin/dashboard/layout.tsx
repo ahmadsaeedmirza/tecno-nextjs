@@ -38,6 +38,7 @@ export default function AdminDashboardLayout({
   if (!isMounted) return null;
 
   const navItems = [
+    { name: "Overview", href: "/admin/dashboard", icon: LayoutDashboard },
     { name: "Products", href: "/admin/dashboard/products", icon: Package },
     { name: "Categories", href: "/admin/dashboard/categories", icon: Layers },
     { name: "Events", href: "/admin/dashboard/events", icon: Calendar },
