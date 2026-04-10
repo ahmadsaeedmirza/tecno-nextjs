@@ -126,13 +126,13 @@ const Index = () => {
           publicFetch("/api/v1/categories?isFeatured=true&limit=8&fields=name,slug,imageCover") as Promise<
             ApiListResponse<BackendCategory>
           >,
-          publicFetch("/api/v1/products?isFeatured=true&limit=12&fields=name,slug,imageCover,category") as Promise<
+          publicFetch("/api/v1/products?isFeatured=true&limit=12&fields=name,slug,imageCover,category,description,code") as Promise<
             ApiListResponse<BackendProduct>
           >,
           publicFetch("/api/v1/events?limit=5&sort=-date&fields=name,slug,imageCover,date") as Promise<
             ApiListResponse<BackendEvent>
           >,
-          publicFetch(`/api/v1/carousels?limit=10&sort=createdAt&fields=image,title,description,link`) as Promise<
+          publicFetch(`/api/v1/carousels?limit=10&sort=createdAt&fields=imageCover,title,description`) as Promise<
             ApiListResponse<any>
           >,
           publicFetch(`/api/v1/feedbacks?isHidden=false&sort=-createdAt&limit=10&fields=name,message,averageRating,role,country`) as Promise<
