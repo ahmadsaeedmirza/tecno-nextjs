@@ -55,6 +55,8 @@ export const metadata: Metadata = {
   },
 };
 
+import { Toaster } from "@/components/ui/toaster";
+
 export default async function RootLayout({
   children,
   params
@@ -83,6 +85,7 @@ export default async function RootLayout({
       >
         <NextIntlClientProvider messages={messages}>
           <Suspense fallback={<LoadingScreen />}>{children}</Suspense>
+          <Toaster />
         </NextIntlClientProvider>
       </body>
     </html>

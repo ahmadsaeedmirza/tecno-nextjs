@@ -138,9 +138,9 @@ export default function AdminSettingsPage() {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="px-8 py-3 bg-slate-900 text-white rounded-2xl font-semibold hover:bg-slate-800 disabled:opacity-50 transition-all flex items-center gap-2"
+                    className="px-8 py-4 bg-gradient-to-r from-orange-600 to-orange-400 text-white rounded-2xl font-bold shadow-lg shadow-orange-500/20 hover:shadow-orange-500/40 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 transition-all flex items-center gap-2"
                   >
-                    {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+                    {isLoading && <Loader2 className="w-5 h-5 animate-spin" />}
                     Update Password
                   </button>
                 </div>
