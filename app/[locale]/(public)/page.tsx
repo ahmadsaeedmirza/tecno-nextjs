@@ -102,6 +102,7 @@ const Index = () => {
   // Marquee animation duration - dynamic based on item count
   const [marqueeDuration, setMarqueeDuration] = useState(24);
   const [infiniteSlides, setInfiniteSlides] = useState<any[]>([]);
+  const [feedbacks, setFeedbacks] = useState<any[]>([]);
 
   // Attempt to play video on mount (handles mobile autoplay restrictions)
   useEffect(() => {
@@ -121,7 +122,7 @@ const Index = () => {
 
     async function loadHomeData() {
       try {
-        const [categoriesRes, productsRes, latestEventRes, carouselsRes] = await Promise.all([
+        const [categoriesRes, productsRes, latestEventRes, carouselsRes, feedbacksRes] = await Promise.all([
           publicFetch("/api/v1/categories?isFeatured=true&limit=50&sort=-_id") as Promise<
             ApiListResponse<BackendCategory>
           >,
@@ -132,6 +133,9 @@ const Index = () => {
             ApiListResponse<BackendEvent>
           >,
           publicFetch(`/api/v1/carousels?limit=100&sort=createdAt`) as Promise<
+            ApiListResponse<any>
+          >,
+          publicFetch(`/api/v1/feedbacks?isHidden=false&sort=-createdAt`) as Promise<
             ApiListResponse<any>
           >,
         ]);
@@ -239,6 +243,7 @@ const Index = () => {
           setCategories(mappedCategories);
           setFeaturedProducts(mappedFeaturedProducts);
           setLatestEvent(latest);
+          setFeedbacks(feedbacksRes?.data?.data ?? []);
         }
       } catch (error) {
         console.error("Home data fetch error:", error);
@@ -604,7 +609,7 @@ const Index = () => {
       </section>
 
       {/* ===== REVIEWS ===== */}
-      <ReviewsSection />
+      <ReviewsSection feedbacks={feedbacks} />
 
       {/* ===== CTA ===== */}
       <section className="py-10">

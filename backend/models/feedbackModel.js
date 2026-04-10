@@ -34,6 +34,11 @@ const feedbackSchema = new mongoose.Schema({
     createdAt: {
         type: Date,
         default: Date.now()
+    },
+    isHidden: {
+        type: String,
+        default: "false",
+        enum: ["true", "false"]
     }
 }, {
     toJSON: { virtuals: true },

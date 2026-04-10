@@ -7,6 +7,7 @@ import {
   Search, 
   Trash2, 
   Eye, 
+  EyeOff,
   Package,
   Calendar,
   User,
@@ -48,6 +49,7 @@ interface Feedback {
   averageRating: number;
   message: string;
   createdAt: string;
+  isHidden: string;
 }
 
 type FilterType = "all" | "positive" | "negative";
@@ -101,6 +103,27 @@ export default function AdminFeedbackPage() {
       toast({ title: "Deletion failed", description: err.message, variant: "destructive" });
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  const handleToggleHide = async (feedback: Feedback) => {
+    const newStatus = feedback.isHidden === "true" ? "false" : "true";
+    try {
+      await adminFetch(`/api/v1/feedbacks/${feedback._id}`, {
+        method: "PATCH",
+        body: { isHidden: newStatus },
+      });
+      toast({
+        title: `Feedback ${newStatus === "true" ? "hidden" : "visible"}`,
+        description: `Feedback from ${feedback.name} has been updated.`,
+      });
+      fetchFeedbacks();
+    } catch (err: any) {
+      toast({
+        variant: "destructive",
+        title: "Action failed",
+        description: err.message,
+      });
     }
   };
 
@@ -259,7 +282,7 @@ export default function AdminFeedbackPage() {
                 <tr className="bg-slate-50/50 border-b border-slate-200">
                   <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Customer</th>
                   <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider hidden md:table-cell">Overall Rating</th>
-                  <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider hidden lg:table-cell text-center">Summary</th>
+                  <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider hidden lg:table-cell">Status</th>
                   <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-right">Actions</th>
                 </tr>
               </thead>
@@ -312,13 +335,27 @@ export default function AdminFeedbackPage() {
                           <td className="px-6 py-4 hidden md:table-cell">
                             <RatingStars rating={f.averageRating} />
                           </td>
-                          <td className="px-6 py-4 hidden lg:table-cell max-w-xs">
-                            <p className="text-sm text-slate-500 line-clamp-1 italic">
-                              "{f.message}"
-                            </p>
+                          <td className="px-6 py-4 hidden lg:table-cell">
+                            <div className="flex items-center gap-2">
+                              <span
+                                className={`w-1.5 h-1.5 rounded-full ${f.isHidden === "true" ? "bg-amber-400" : "bg-emerald-500"}`}
+                              />
+                              <span
+                                className={`text-xs font-semibold ${f.isHidden === "true" ? "text-amber-600" : "text-emerald-700"}`}
+                              >
+                                {f.isHidden === "true" ? "Hidden" : "Public"}
+                              </span>
+                            </div>
                           </td>
                           <td className="px-6 py-4 text-right">
                             <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button
+                                onClick={() => handleToggleHide(f)}
+                                className={`p-2 rounded-lg transition-colors ${f.isHidden === "true" ? "text-emerald-600 hover:bg-emerald-50" : "text-amber-600 hover:bg-amber-50"}`}
+                                title={f.isHidden === "true" ? "Show on Homepage" : "Hide from Homepage"}
+                              >
+                                {f.isHidden === "true" ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                              </button>
                               <button 
                                 onClick={() => setSelectedFeedback(f)}
                                 className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"

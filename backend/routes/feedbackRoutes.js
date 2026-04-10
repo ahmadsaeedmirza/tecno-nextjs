@@ -15,6 +15,7 @@ router.route("/").get(feedbackController.getAllFeedbacks);
 router
   .route("/:id")
   .get(feedbackController.getFeedback)
+  .patch(feedbackController.updateFeedback)
   .delete(feedbackController.deleteFeedback);
 
 module.exports = router;

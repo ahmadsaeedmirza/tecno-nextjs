@@ -10,5 +10,8 @@ exports.getAllFeedbacks = factory.getAll(Feedback);
 // Admin: Get single feedback
 exports.getFeedback = factory.getOne(Feedback);
 
+// Admin: Update feedback
+exports.updateFeedback = factory.updateOne(Feedback);
+
 // Admin: Delete feedback
 exports.deleteFeedback = factory.deleteOne(Feedback);
