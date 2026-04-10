@@ -84,6 +84,7 @@ const Feedback = () => {
       });
 
       if (!res.ok) throw new Error("Failed to submit feedback");
+
       setSubmitted(true);
     } catch (err) {
       alert("Something went wrong! Please try again.");

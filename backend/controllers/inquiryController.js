@@ -1,7 +1,35 @@
 const Inquiry = require('./../models/inquiryModel');
 const factory = require('./factoryFunctions');
 
-exports.createInquiry = factory.createOne(Inquiry);
+const catchAsync = require('./../utlis/catchAsync');
+const sendEmailJS = require('./../utlis/sendEmailJS');
+
+exports.createInquiry = catchAsync(async (req, res, next) => {
+  let doc = await Inquiry.create(req.body);
+
+  // Populate product so we can send the actual name in the email
+  try {
+    doc = await doc.populate({ path: 'product', select: 'name' });
+  } catch (popErr) {
+    console.warn('Populate failed:', popErr.message);
+  }
+
+  // Send autonomous confirmation email (awaiting briefly to ensure logs are visible)
+  await sendEmailJS({
+    name: doc.name,
+    email: doc.email,
+    type: "Inquiry",
+    product_name: doc.product?.name || "General Inquiry",
+    message_content: doc.message
+  });
+
+  res.status(201).json({
+    status: 'success',
+    data: {
+      data: doc
+    }
+  });
+});
 exports.getAllInquiries = factory.getAll(Inquiry);
 exports.getInquiry = factory.getOne(Inquiry);
 exports.deleteInquiry = factory.deleteOne(Inquiry);
