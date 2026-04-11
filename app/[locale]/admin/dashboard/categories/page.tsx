@@ -45,6 +45,7 @@ export default function AdminCategoriesPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showOnlyFeatured, setShowOnlyFeatured] = useState(false);
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
@@ -159,6 +160,20 @@ export default function AdminCategoriesPage() {
 
   const handleToggleFeature = async (category: Category) => {
     const newStatus = category.isFeatured === "true" ? "false" : "true";
+
+    // Enforce limit of 4 featured categories
+    if (newStatus === "true") {
+      const featuredCount = categories.filter((c) => c.isFeatured === "true").length;
+      if (featuredCount >= 4) {
+        toast({
+          title: "Limit reached",
+          description: "You can only have a maximum of 4 featured categories.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
     try {
       await adminFetch(`/api/v1/categories/${category._id}`, {
         method: "PATCH",
@@ -203,9 +218,11 @@ export default function AdminCategoriesPage() {
     }
   };
 
-  const filteredCategories = categories.filter((c) =>
-    c.name.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+  const filteredCategories = categories.filter((c) => {
+    const matchesSearch = c.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesFeatured = showOnlyFeatured ? c.isFeatured === "true" : true;
+    return matchesSearch && matchesFeatured;
+  });
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -344,6 +361,18 @@ export default function AdminCategoriesPage() {
             className="w-full pl-11 pr-4 py-3 rounded-xl bg-white border border-slate-200 outline-none transition-all duration-200 focus:border-orange-200 focus:ring-4 focus:ring-orange-50"
           />
         </div>
+
+        <button
+          onClick={() => setShowOnlyFeatured(!showOnlyFeatured)}
+          className={`flex items-center justify-center gap-2 px-6 py-3 rounded-xl border transition-all duration-200 font-semibold text-sm whitespace-nowrap ${
+            showOnlyFeatured
+              ? "bg-orange-50 border-orange-200 text-orange-600 shadow-sm shadow-orange-100"
+              : "bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50"
+          }`}
+        >
+          <Star className={`w-4 h-4 ${showOnlyFeatured ? "fill-orange-600" : ""}`} />
+          {showOnlyFeatured ? "Showing Featured" : "Show Featured"}
+        </button>
       </div>
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden min-h-[400px] flex flex-col">

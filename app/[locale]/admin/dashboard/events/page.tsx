@@ -14,6 +14,7 @@ import {
   MapPin,
   Upload,
   X,
+  Star,
   Calendar as CalendarIcon,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -36,6 +37,7 @@ interface Event {
   imageCover: string;
   date: string;
   StallNo?: string;
+  isFeatured: string;
   slug: string;
 }
 
@@ -48,6 +50,7 @@ export default function AdminEventsPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showOnlyFeatured, setShowOnlyFeatured] = useState(false);
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
@@ -180,6 +183,41 @@ export default function AdminEventsPage() {
     }
   };
 
+  const handleToggleFeature = async (event: Event) => {
+    const newStatus = event.isFeatured === "true" ? "false" : "true";
+
+    // Enforce limit of 1 featured event
+    if (newStatus === "true") {
+      const featuredCount = events.filter((e) => e.isFeatured === "true").length;
+      if (featuredCount >= 1) {
+        toast({
+          title: "Limit reached",
+          description: "You can only have exactly one featured event.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
+    try {
+      await adminFetch(`/api/v1/events/${event._id}`, {
+        method: "PATCH",
+        body: { isFeatured: newStatus },
+      });
+      toast({
+        title: `Event ${newStatus === "true" ? "featured" : "unfeatured"}`,
+        description: `${event.name} has been updated.`,
+      });
+      fetchEvents();
+    } catch (err: any) {
+      toast({
+        variant: "destructive",
+        title: "Action failed",
+        description: err.message,
+      });
+    }
+  };
+
   const handleDelete = async () => {
     if (!deleteId) return;
     setIsDeleting(true);
@@ -205,9 +243,11 @@ export default function AdminEventsPage() {
     }
   };
 
-  const filteredEvents = events.filter((e) =>
-    e.name.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+  const filteredEvents = events.filter((e) => {
+    const matchesSearch = e.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesFeatured = showOnlyFeatured ? e.isFeatured === "true" : true;
+    return matchesSearch && matchesFeatured;
+  });
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -381,6 +421,18 @@ export default function AdminEventsPage() {
             className="w-full pl-11 pr-4 py-3 rounded-xl bg-white border border-slate-200 outline-none transition-all duration-200 focus:border-orange-200 focus:ring-4 focus:ring-orange-50"
           />
         </div>
+
+        <button
+          onClick={() => setShowOnlyFeatured(!showOnlyFeatured)}
+          className={`flex items-center justify-center gap-2 px-6 py-3 rounded-xl border transition-all duration-200 font-semibold text-sm whitespace-nowrap ${
+            showOnlyFeatured
+              ? "bg-orange-50 border-orange-200 text-orange-600 shadow-sm shadow-orange-100"
+              : "bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50"
+          }`}
+        >
+          <Star className={`w-4 h-4 ${showOnlyFeatured ? "fill-orange-600" : ""}`} />
+          {showOnlyFeatured ? "Showing Featured" : "Show Featured"}
+        </button>
       </div>
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden min-h-[400px] flex flex-col">
@@ -471,10 +523,30 @@ export default function AdminEventsPage() {
                           >
                             {event.isHidden === "true" ? "Hidden" : "Public"}
                           </span>
+
+                          {event.isFeatured === "true" && (
+                            <div className="flex items-center gap-1.5 mt-1">
+                              <Star className="w-3 h-3 text-orange-500 fill-orange-500" />
+                              <span className="text-[10px] font-bold text-orange-600 uppercase tracking-wider">
+                                Featured
+                              </span>
+                            </div>
+                          )}
                         </div>
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={() => handleToggleFeature(event)}
+                            className={`p-2 rounded-lg transition-colors ${event.isFeatured === "true" ? "text-orange-600 hover:bg-orange-50" : "text-slate-400 hover:text-orange-500 hover:bg-slate-50"}`}
+                            title={
+                              event.isFeatured === "true"
+                                ? "Unfeature Event"
+                                : "Feature Event"
+                            }
+                          >
+                            <Star className={`w-4 h-4 ${event.isFeatured === "true" ? "fill-current" : ""}`} />
+                          </button>
                           <button
                             onClick={() => handleToggleHide(event)}
                             className={`p-2 rounded-lg transition-colors ${event.isHidden === "true" ? "text-emerald-600 hover:bg-emerald-50" : "text-amber-600 hover:bg-amber-50"}`}

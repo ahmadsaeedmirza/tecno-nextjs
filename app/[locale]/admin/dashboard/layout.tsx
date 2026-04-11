@@ -56,7 +56,7 @@ export default function AdminDashboardLayout({
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex">
+    <div className="h-screen overflow-hidden bg-slate-50 flex text-slate-900">
       {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (
         <div

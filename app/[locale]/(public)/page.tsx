@@ -64,6 +64,7 @@ type BackendEvent = {
   date: string;
   StallNo?: string;
   isHidden?: "true" | "false";
+  isFeatured?: "true" | "false";
 };
 
 type HomeCategoryCard = {
@@ -129,7 +130,7 @@ const Index = () => {
           publicFetch("/api/v1/products?isFeatured=true&limit=12&fields=name,slug,imageCover,category,description,code") as Promise<
             ApiListResponse<BackendProduct>
           >,
-          publicFetch("/api/v1/events?limit=5&sort=-date&fields=name,slug,imageCover,date") as Promise<
+          publicFetch("/api/v1/events?sort=-isFeatured,-date&limit=10&fields=name,slug,imageCover,date,description,StallNo,isFeatured") as Promise<
             ApiListResponse<BackendEvent>
           >,
           publicFetch(`/api/v1/carousels?limit=10&sort=createdAt&fields=imageCover,title,description`) as Promise<
@@ -151,7 +152,9 @@ const Index = () => {
           (e) => e.isHidden !== "true",
         );
 
-        const latest =
+        const featuredEvent = backendEvents.find(e => e.isFeatured === "true");
+
+        const latest = (featuredEvent ||
           backendEvents.slice().sort((a, b) => {
             const aTime = Number.isFinite(Date.parse(a.date))
               ? Date.parse(a.date)
@@ -160,7 +163,7 @@ const Index = () => {
               ? Date.parse(b.date)
               : 0;
             return bTime - aTime;
-          })[0] ?? null;
+          })[0]) ?? null;
 
         const productCountByCategorySlug = new Map<string, number>();
         for (const p of backendProducts) {

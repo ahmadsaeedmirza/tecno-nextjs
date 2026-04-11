@@ -60,6 +60,7 @@ export default function AdminProductsPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showOnlyFeatured, setShowOnlyFeatured] = useState(false);
   const { toast } = useToast();
 
   // Form State
@@ -249,6 +250,20 @@ export default function AdminProductsPage() {
 
   const handleToggleFeature = async (product: Product) => {
     const newStatus = product.isFeatured === "true" ? "false" : "true";
+
+    // Enforce limit of 4 featured products
+    if (newStatus === "true") {
+      const featuredCount = products.filter((p) => p.isFeatured === "true").length;
+      if (featuredCount >= 4) {
+        toast({
+          title: "Limit reached",
+          description: "You can only have a maximum of 4 featured products.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
     try {
       await adminFetch(`/api/v1/products/${product._id}`, {
         method: "PATCH",
@@ -302,7 +317,9 @@ export default function AdminProductsPage() {
       ? p.category?._id === selectedCategoryId
       : true;
 
-    return matchesSearch && matchesCategory;
+    const matchesFeatured = showOnlyFeatured ? p.isFeatured === "true" : true;
+
+    return matchesSearch && matchesCategory && matchesFeatured;
   });
 
   return (
@@ -571,7 +588,7 @@ export default function AdminProductsPage() {
 
       {/* Action Bar */}
       <div className="flex flex-col sm:flex-row gap-4">
-        <div className="relative group sm:w-3/4">
+        <div className="relative group flex-1">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-orange-500 transition-colors" />
           <input
             type="text"
@@ -581,6 +598,18 @@ export default function AdminProductsPage() {
             className="w-full pl-11 pr-4 py-3 rounded-xl bg-white border border-slate-200 outline-none transition-all duration-200 focus:border-orange-200 focus:ring-4 focus:ring-orange-50"
           />
         </div>
+
+        <button
+          onClick={() => setShowOnlyFeatured(!showOnlyFeatured)}
+          className={`flex items-center justify-center gap-2 px-6 py-3 rounded-xl border transition-all duration-200 font-semibold text-sm whitespace-nowrap ${
+            showOnlyFeatured
+              ? "bg-orange-50 border-orange-200 text-orange-600 shadow-sm shadow-orange-100"
+              : "bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50"
+          }`}
+        >
+          <Star className={`w-4 h-4 ${showOnlyFeatured ? "fill-orange-600" : ""}`} />
+          {showOnlyFeatured ? "Showing Featured" : "Show Featured"}
+        </button>
 
         <div className="sm:w-1/4">
           <select

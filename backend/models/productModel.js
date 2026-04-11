@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const slugify = require("slugify");
 const Category = require("./categoryModel");
+const AppError = require("../utlis/appError");
 
 const productSchema = new mongoose.Schema(
   {
@@ -53,8 +54,36 @@ productSchema.pre(/^find/, function () {
   this.populate("category");
 });
 
-productSchema.pre("save", function () {
+productSchema.pre("save", async function () {
   this.slug = slugify(this.name, { lower: true });
+
+  if (this.isFeatured === "true") {
+    const featuredCount = await this.constructor.countDocuments({
+      isFeatured: "true",
+    });
+    if (featuredCount >= 4) {
+      throw new AppError("You can only have a maximum of 4 featured products.", 400);
+    }
+  }
+});
+
+productSchema.pre("findOneAndUpdate", async function () {
+  const update = this.getUpdate();
+  if (update.isFeatured === "true") {
+    const featuredCount = await this.model.countDocuments({
+      isFeatured: "true",
+    });
+    if (featuredCount >= 4) {
+      // Check if we are updating an already featured item (to allow it)
+      const currentDoc = await this.model.findOne(this.getQuery());
+      if (currentDoc && currentDoc.isFeatured !== "true") {
+        throw new AppError(
+          "You can only have a maximum of 4 featured products.",
+          400,
+        );
+      }
+    }
+  }
 });
 
 const Product = mongoose.model("Product", productSchema);
