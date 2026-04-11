@@ -169,7 +169,8 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
         // Points to the NEXT.JS frontend (usually port 3000)
         // We assume locale 'en' if not provided, or detect from req if possible
         const locale = req.headers['accept-language']?.split(',')[0].split('-')[0] || 'en';
-        const resetURL = `http://localhost:3000/${locale}/admin/reset-password/${resetToken}`;
+        const frontendURL = process.env.FRONTEND_URL || 'http://localhost:3000';
+        const resetURL = `${frontendURL}/${locale}/admin/reset-password/${resetToken}`;
 
         console.log(`[Auth] Generating reset link for ${user.email}: ${resetURL}`);
 
