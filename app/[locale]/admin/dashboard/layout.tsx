@@ -17,6 +17,8 @@ import {
   KeyRound
 } from "lucide-react";
 import Image from "next/image";
+import { SocketProvider } from "@/components/providers/socket-provider";
+import { useSocket } from "@/hooks/use-socket";
 
 export default function AdminDashboardLayout({
   children,
@@ -39,6 +41,38 @@ export default function AdminDashboardLayout({
 
   if (!isMounted) return null;
 
+  return (
+    <SocketProvider>
+      <LayoutContent
+        isSidebarOpen={isSidebarOpen}
+        setIsSidebarOpen={setIsSidebarOpen}
+        pathname={pathname}
+        handleLogout={() => {
+          localStorage.removeItem("admin_token");
+          router.push("/admin/login");
+        }}
+      >
+        {children}
+      </LayoutContent>
+    </SocketProvider>
+  );
+}
+
+function LayoutContent({ 
+  children, 
+  isSidebarOpen, 
+  setIsSidebarOpen, 
+  pathname, 
+  handleLogout 
+}: { 
+  children: React.ReactNode, 
+  isSidebarOpen: boolean, 
+  setIsSidebarOpen: (o: boolean) => void, 
+  pathname: string, 
+  handleLogout: () => void 
+}) {
+  const { isConnected } = useSocket();
+
   const navItems = [
     { name: "Overview", href: "/admin/dashboard", icon: LayoutDashboard },
     { name: "Carousel", href: "/admin/dashboard/carousel", icon: MonitorPlay },
@@ -49,11 +83,6 @@ export default function AdminDashboardLayout({
     { name: "Feedback", href: "/admin/dashboard/feedback", icon: MessageSquare },
     { name: "Settings", href: "/admin/dashboard/settings", icon: KeyRound },
   ];
-
-  const handleLogout = () => {
-    localStorage.removeItem("admin_token");
-    router.push("/admin/login");
-  };
 
   return (
     <div className="h-screen overflow-hidden bg-slate-50 flex text-slate-900">
@@ -123,8 +152,12 @@ export default function AdminDashboardLayout({
           </button>
 
           <div className="flex items-center justify-between gap-4 w-full">
-            <div>
+            <div className="flex items-center gap-4">
               <span className="font-bold text-xl text-slate-800 tracking-tight">Admin Panel</span>
+              <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border ${isConnected ? "bg-emerald-50 border-emerald-100 text-emerald-600" : "bg-amber-50 border-amber-100 text-amber-600"}`}>
+                <div className={`w-1.5 h-1.5 rounded-full ${isConnected ? "bg-emerald-500 animate-pulse" : "bg-amber-500"}`} />
+                <span className="text-[10px] font-black uppercase tracking-wider">{isConnected ? "Live" : "Connecting"}</span>
+              </div>
             </div>
             <div className="flex items-center gap-4">
               <div className="text-right hidden sm:block">

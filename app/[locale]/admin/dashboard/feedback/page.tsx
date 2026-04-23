@@ -33,6 +33,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useSocket } from "@/hooks/use-socket";
 
 interface Feedback {
   _id: string;
@@ -69,6 +70,7 @@ export default function AdminFeedbackPage() {
   const ITEMS_PER_PAGE = 25;
 
   const { toast } = useToast();
+  const { socket } = useSocket();
 
   const fetchFeedbacks = async () => {
     try {
@@ -89,6 +91,25 @@ export default function AdminFeedbackPage() {
   useEffect(() => {
     fetchFeedbacks();
   }, []);
+
+  // Socket Listener for real-time updates
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleNewFeedback = (newFeedback: Feedback) => {
+      setFeedbacks(prev => [newFeedback, ...prev]);
+      toast({
+        title: "New Feedback Received!",
+        description: `Feedback from ${newFeedback.name} has been added.`,
+      });
+    };
+
+    socket.on("new-feedback", handleNewFeedback);
+
+    return () => {
+      socket.off("new-feedback", handleNewFeedback);
+    };
+  }, [socket, toast]);
 
   const handleDelete = async () => {
     if (!deleteId) return;

@@ -27,6 +27,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useSocket } from "@/hooks/use-socket";
 
 interface Inquiry {
   _id: string;
@@ -55,6 +56,7 @@ export default function AdminInquiriesPage() {
   const ITEMS_PER_PAGE = 25;
 
   const { toast } = useToast();
+  const { socket } = useSocket();
 
   const fetchInquiries = async () => {
     try {
@@ -75,6 +77,25 @@ export default function AdminInquiriesPage() {
   useEffect(() => {
     fetchInquiries();
   }, []);
+
+  // Socket Listener for real-time updates
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleNewInquiry = (newInquiry: Inquiry) => {
+      setInquiries(prev => [newInquiry, ...prev]);
+      toast({
+        title: "New Inquiry Received!",
+        description: `Inquiry from ${newInquiry.name} for ${newInquiry.product?.name || "Product"} has been added.`,
+      });
+    };
+
+    socket.on("new-inquiry", handleNewInquiry);
+
+    return () => {
+      socket.off("new-inquiry", handleNewInquiry);
+    };
+  }, [socket, toast]);
 
   const handleDelete = async () => {
     if (!deleteId) return;

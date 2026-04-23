@@ -1,5 +1,8 @@
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
+const http = require('http');
+const socketUtils = require('./utlis/socket');
+
 dotenv.config({ path: './config.env' });
 
 process.on('uncaughtException', err => {
@@ -22,8 +25,13 @@ mongoose
   });
 
 const port = process.env.PORT;
-const server = app.listen(port, () => {
-  console.log(`App running on port ${port}`);
+const server = http.createServer(app);
+
+// Initialize Socket.io
+socketUtils.init(server);
+
+server.listen(port, () => {
+  console.log(`App running on port ${port} with Socket.io enabled`);
 });
 
 process.on('unhandledRejection', err => {

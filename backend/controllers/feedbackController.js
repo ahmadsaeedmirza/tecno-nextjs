@@ -1,12 +1,20 @@
 const Feedback = require('./../models/feedbackModel');
 const factory = require('./factoryFunctions');
-
 const catchAsync = require('./../utlis/catchAsync');
 const sendEmailJS = require('./../utlis/sendEmailJS');
+const socketUtils = require('./../utlis/socket');
 
 // Public: Submit feedback
 exports.createFeedback = catchAsync(async (req, res, next) => {
   const doc = await Feedback.create(req.body);
+
+  // Real-time notification
+  try {
+    const io = socketUtils.getIO();
+    io.emit('new-feedback', doc);
+  } catch (err) {
+    console.error('Socket emit failed:', err.message);
+  }
 
   // Send autonomous confirmation email (awaiting briefly to ensure logs are visible)
   await sendEmailJS({

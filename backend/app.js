@@ -44,7 +44,20 @@ app.options(/.*/, cors(corsOptions));
 app.use(express.static(path.join(__dirname, "../public")));
 
 // ── SECURITY HTTP HEADERS ─────────────────────────────────────────────────────
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        connectSrc: ["'self'", "http://localhost:8000", "ws://localhost:8000", "http://127.0.0.1:8000", "ws://127.0.0.1:8000", "https://tecno-nextjs.vercel.app"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", "data:", "blob:", "http://localhost:8000", "https://tecno-nextjs.vercel.app"],
+      },
+    },
+    crossOriginResourcePolicy: { policy: "cross-origin" }
+  })
+);
 
 // ── DEVELOPMENT LOGGING ───────────────────────────────────────────────────────
 if (process.env.NODE_ENV === "development") {

@@ -17,10 +17,12 @@ import {
   TrendingUp,
   Award
 } from "lucide-react";
+import { useSocket } from "@/hooks/use-socket";
 
 export default function AdminDashboardOverview() {
   const [data, setData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { socket } = useSocket();
 
   useEffect(() => {
     async function loadDashboard() {
@@ -45,23 +47,23 @@ export default function AdminDashboardOverview() {
           : "N/A";
 
         // Process Inquiry Trends
-        const catCount: Record<string, number> = {};
-        const prodCount: Record<string, number> = {};
+        const categoryCounts: Record<string, number> = {};
+        const productCounts: Record<string, number> = {};
         
         inquiries.forEach((inq: any) => {
           if (inq.category?.name) {
-            catCount[inq.category.name] = (catCount[inq.category.name] || 0) + 1;
+            categoryCounts[inq.category.name] = (categoryCounts[inq.category.name] || 0) + 1;
           }
           if (inq.product?.name) {
-            prodCount[inq.product.name] = (prodCount[inq.product.name] || 0) + 1;
+            productCounts[inq.product.name] = (productCounts[inq.product.name] || 0) + 1;
           }
         });
 
-        const topCategories = Object.entries(catCount)
+        const topCategories = Object.entries(categoryCounts)
           .sort((a, b) => b[1] - a[1])
           .slice(0, 4);
           
-        const topProducts = Object.entries(prodCount)
+        const topProducts = Object.entries(productCounts)
           .sort((a, b) => b[1] - a[1])
           .slice(0, 4);
 
@@ -83,6 +85,8 @@ export default function AdminDashboardOverview() {
             feedbacks: feedbacks.length,
             avgRating
           },
+          categoryCounts, // Store full mapping for real-time updates
+          productCounts,  // Store full mapping for real-time updates
           topCategories,
           topProducts,
           recentInquiries,
@@ -97,6 +101,76 @@ export default function AdminDashboardOverview() {
 
     loadDashboard();
   }, []);
+
+  // Socket Listeners for Real-Time Updates
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleNewInquiry = (inquiry: any) => {
+      setData((prev: any) => {
+        if (!prev) return prev;
+        
+        // 1. Update full counts
+        const newProdName = inquiry.product?.name;
+        const newCatName = inquiry.category?.name;
+        
+        const updatedProdCounts = { ...prev.productCounts };
+        if (newProdName) {
+          updatedProdCounts[newProdName] = (updatedProdCounts[newProdName] || 0) + 1;
+        }
+
+        const updatedCatCounts = { ...prev.categoryCounts };
+        if (newCatName) {
+          updatedCatCounts[newCatName] = (updatedCatCounts[newCatName] || 0) + 1;
+        }
+
+        // 2. Re-calculate top lists
+        const newTopProducts = Object.entries(updatedProdCounts)
+          .sort((a: any, b: any) => b[1] - a[1])
+          .slice(0, 4);
+
+        const newTopCategories = Object.entries(updatedCatCounts)
+          .sort((a: any, b: any) => b[1] - a[1])
+          .slice(0, 4);
+
+        return {
+          ...prev,
+          counts: {
+            ...prev.counts,
+            inquiries: prev.counts.inquiries + 1
+          },
+          productCounts: updatedProdCounts,
+          categoryCounts: updatedCatCounts,
+          topProducts: newTopProducts,
+          topCategories: newTopCategories,
+          recentInquiries: [inquiry, ...prev.recentInquiries].slice(0, 5)
+        };
+      });
+    };
+
+    const handleNewFeedback = (feedback: any) => {
+      setData((prev: any) => {
+        if (!prev) return prev;
+        const newTotal = prev.counts.feedbacks + 1;
+        return {
+          ...prev,
+          counts: {
+            ...prev.counts,
+            feedbacks: newTotal
+          },
+          recentFeedbacks: [feedback, ...prev.recentFeedbacks].slice(0, 5)
+        };
+      });
+    };
+
+    socket.on("new-inquiry", handleNewInquiry);
+    socket.on("new-feedback", handleNewFeedback);
+
+    return () => {
+      socket.off("new-inquiry", handleNewInquiry);
+      socket.off("new-feedback", handleNewFeedback);
+    };
+  }, [socket]);
 
   if (isLoading) {
     return (

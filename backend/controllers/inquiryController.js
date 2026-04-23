@@ -1,8 +1,8 @@
 const Inquiry = require('./../models/inquiryModel');
 const factory = require('./factoryFunctions');
-
 const catchAsync = require('./../utlis/catchAsync');
 const sendEmailJS = require('./../utlis/sendEmailJS');
+const socketUtils = require('./../utlis/socket');
 
 exports.createInquiry = catchAsync(async (req, res, next) => {
   let doc = await Inquiry.create(req.body);
@@ -12,6 +12,14 @@ exports.createInquiry = catchAsync(async (req, res, next) => {
     doc = await doc.populate({ path: 'product', select: 'name' });
   } catch (popErr) {
     console.warn('Populate failed:', popErr.message);
+  }
+
+  // Real-time notification
+  try {
+    const io = socketUtils.getIO();
+    io.emit('new-inquiry', doc);
+  } catch (err) {
+    console.error('Socket emit failed:', err.message);
   }
 
   // Send autonomous confirmation email (awaiting briefly to ensure logs are visible)
