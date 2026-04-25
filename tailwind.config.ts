@@ -12,10 +12,10 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["var(--font-inter)", "sans-serif"],
-        display: ["var(--font-inter)", "sans-serif"],
+        sans: ["var(--font-plus-jakarta-sans)", "var(--font-inter)", "sans-serif"],
+        display: ["var(--font-plus-jakarta-sans)", "sans-serif"],
         body: ["var(--font-inter)", "sans-serif"],
-        outfit: ["var(--font-outfit)", "sans-serif"],
+        jakarta: ["var(--font-plus-jakarta-sans)", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",

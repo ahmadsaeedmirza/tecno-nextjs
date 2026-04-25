@@ -89,7 +89,7 @@ export default function AdminLoginPage() {
           <Image src="/tecno-logo.png" alt="Tecno Industries" width={140} height={40} className="object-contain brightness-0 invert" />
         </div>
         <div className="relative z-10 space-y-6">
-          <h1 className="text-4xl font-bold leading-tight" style={{ fontFamily: "var(--font-outfit)", color: "#fff" }}>
+          <h1 className="text-4xl font-bold leading-tight" style={{ fontFamily: "var(--font-plus-jakarta-sans)", color: "#fff" }}>
             Admin Control <span style={{ display: "block", backgroundImage: "linear-gradient(135deg, hsl(24 85% 58%), hsl(32 90% 65%))", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Panel</span>
           </h1>
           <p className="text-sm leading-relaxed" style={{ color: "hsl(0 0% 55%)" }}>Secure access to management operations.</p>
@@ -100,7 +100,7 @@ export default function AdminLoginPage() {
       <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12">
         <div className="w-full max-w-md space-y-8">
           <div className="space-y-2">
-            <h2 className="text-3xl font-bold" style={{ fontFamily: "var(--font-outfit)", color: "#fff" }}>
+            <h2 className="text-3xl font-bold" style={{ fontFamily: "var(--font-plus-jakarta-sans)", color: "#fff" }}>
               {isForgotMode ? "Reset Password" : "Welcome back"}
             </h2>
             <p className="text-sm" style={{ color: "hsl(0 0% 50%)" }}>

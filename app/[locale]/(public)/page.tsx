@@ -630,7 +630,7 @@ const Index = () => {
                 </p>
                 <div className="flex flex-wrap justify-center gap-3">
                   <Link
-                    href="/inquiry"
+                    href="/contact"
                     className="gradient-button px-6 py-2.5 text-sm inline-flex items-center gap-2"
                   >
                     {t("sendInquiry")} <ArrowRight className="w-3.5 h-3.5" />

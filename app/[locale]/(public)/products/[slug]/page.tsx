@@ -82,11 +82,16 @@ const ProductDetail = () => {
     };
   }, [slug]);
 
-  const features = useMemo(() => {
-    const items = [...(product?.tip ?? []), ...(product?.size ?? [])]
+  const tips = useMemo(() => {
+    return (product?.tip ?? [])
       .map((s) => (typeof s === "string" ? s.trim() : ""))
       .filter(Boolean);
-    return Array.from(new Set(items));
+  }, [product]);
+
+  const sizes = useMemo(() => {
+    return (product?.size ?? [])
+      .map((s) => (typeof s === "string" ? s.trim() : ""))
+      .filter(Boolean);
   }, [product]);
 
   const imageSrc = useMemo(() => {
@@ -210,29 +215,46 @@ const ProductDetail = () => {
                 {categoryName}
               </p>
             ) : null}
-            <h1 className="font-display text-4xl sm:text-5xl font-black mb-6 leading-tight">
-              {product?.name || ""}
+            <h1 className="font-display text-4xl sm:text-5xl font-black mb-2 text-foreground">
+              {product.name}
             </h1>
+            {product.code && (
+              <p className="text-lg font-bold text-muted-foreground mb-6">
+                {t("codeLabel")}: {product.code}
+              </p>
+            )}
             <p className="text-muted-foreground leading-relaxed text-lg mb-8">
               {product?.description || ""}
             </p>
 
-            <div className="glass-card p-6 mb-6 rounded-xl">
-              <h3 className="font-display font-semibold text-xs uppercase tracking-[0.2em] mb-3 text-muted-foreground">
-                {t("codeLabel")}
-              </h3>
-              <p className="text-foreground font-display font-semibold text-lg">
-                {product?.code || "—"}
-              </p>
-            </div>
-
-            {features.length ? (
-              <div className="glass-card p-6 mb-8 rounded-xl">
+            {tips.length ? (
+              <div className="glass-card p-6 mb-6 rounded-xl">
                 <h3 className="font-display font-semibold text-xs uppercase tracking-[0.2em] mb-4 text-muted-foreground">
-                  {t("featuresLabel")}
+                  {t("tipsLabel")}
                 </h3>
                 <ul className="space-y-3">
-                  {features.map((f, idx) => (
+                  {tips.map((f, idx) => (
+                    <li
+                      key={`${f}-${idx}`}
+                      className="flex items-center gap-3 text-sm text-foreground/80"
+                    >
+                      <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <Check className="w-3 h-3 text-primary" />
+                      </div>
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+
+            {sizes.length ? (
+              <div className="glass-card p-6 mb-8 rounded-xl">
+                <h3 className="font-display font-semibold text-xs uppercase tracking-[0.2em] mb-4 text-muted-foreground">
+                  {t("sizesLabel")}
+                </h3>
+                <ul className="space-y-3">
+                  {sizes.map((f, idx) => (
                     <li
                       key={`${f}-${idx}`}
                       className="flex items-center gap-3 text-sm text-foreground/80"

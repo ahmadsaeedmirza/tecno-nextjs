@@ -38,8 +38,8 @@ const QualityPolicy = () => {
 
                 {/* English Content */}
                 <div className="text-left">
-                    <h3 className="text-3xl font-bold text-gray-900 mb-6 font-outfit">Quality Policy</h3>
-                    <p className="text-lg md:text-xl leading-relaxed text-gray-700 font-outfit">
+                    <h3 className="text-3xl font-bold text-gray-900 mb-6 font-jakarta">Quality Policy</h3>
+                    <p className="text-lg md:text-xl leading-relaxed text-gray-700 font-jakarta">
                         Tecno Instruments (Pvt.) Ltd. endeavors to meet or exceed customers requirements.
                         We believe in providing our customer with products that are safe, effective, and
                         reliable over their projected life span. We are committed to employee involvement,

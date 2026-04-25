@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Outfit, Inter } from "next/font/google";
+import { Plus_Jakarta_Sans, Inter } from "next/font/google";
 import "./../globals.css";
 import LoadingScreen from "@/components/LoadingScreen";
 import { Suspense } from "react";
@@ -10,10 +10,10 @@ import { routing } from '@/i18n/routing';
 
 
 
-const outfit = Outfit({
-  variable: "--font-outfit",
+const plusJakartaSans = Plus_Jakarta_Sans({
+  variable: "--font-plus-jakarta-sans",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "900"],
+  weight: ["400", "500", "600", "700", "800"],
 });
 
 const inter = Inter({
@@ -81,7 +81,7 @@ export default async function RootLayout({
         <link rel="icon" href="/tecno-t-logo.png" />
       </head>
       <body
-        className={`${inter.variable} ${outfit.variable} font-sans antialiased bg-white text-black`}
+        className={`${inter.variable} ${plusJakartaSans.variable} font-sans antialiased bg-white text-black`}
       >
         <NextIntlClientProvider messages={messages}>
           <Suspense fallback={<LoadingScreen />}>{children}</Suspense>
