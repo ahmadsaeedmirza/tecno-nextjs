@@ -22,7 +22,9 @@ import {
   ShieldCheck,
   Clock,
   Loader2,
-  X
+  X,
+  Check,
+  RotateCcw
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format, parseISO } from "date-fns";
@@ -51,6 +53,7 @@ interface Feedback {
   message: string;
   createdAt: string;
   isHidden: string;
+  isRead: boolean;
 }
 
 type FilterType = "all" | "positive" | "negative";
@@ -65,6 +68,7 @@ export default function AdminFeedbackPage() {
   // New States for Pagination & Month Filter
   const [selectedMonth, setSelectedMonth] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState(1);
+  const [statusFilter, setStatusFilter] = useState<"all" | "read" | "unread">("all");
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const ITEMS_PER_PAGE = 25;
@@ -148,6 +152,25 @@ export default function AdminFeedbackPage() {
     }
   };
 
+  const handleToggleRead = async (feedback: Feedback) => {
+    try {
+      await adminFetch(`/api/v1/feedbacks/${feedback._id}`, {
+        method: "PATCH",
+        body: { isRead: !feedback.isRead },
+      });
+      toast({
+        title: feedback.isRead ? "Marked as unread" : "Marked as read",
+      });
+      fetchFeedbacks();
+    } catch (err: any) {
+      toast({
+        title: "Action failed",
+        description: err.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   const availableMonths = useMemo(() => {
     const months = new Set<string>();
     feedbacks.forEach(f => {
@@ -172,13 +195,17 @@ export default function AdminFeedbackPage() {
         matchesMonth = itemMonth === targetMonth;
       }
 
-      return matchesSearch && matchesFilter && matchesMonth;
+      let matchesStatus = true;
+      if (statusFilter === "read") matchesStatus = !!f.isRead;
+      if (statusFilter === "unread") matchesStatus = !f.isRead;
+
+      return matchesSearch && matchesFilter && matchesMonth && matchesStatus;
     });
 
     // Sort descending by date
     result.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
     return result;
-  }, [feedbacks, searchTerm, filterType, selectedMonth]);
+  }, [feedbacks, searchTerm, filterType, selectedMonth, statusFilter]);
 
   const totalPages = Math.ceil(processedFeedbacks.length / ITEMS_PER_PAGE) || 1;
   const paginatedFeedbacks = processedFeedbacks.slice(
@@ -188,7 +215,7 @@ export default function AdminFeedbackPage() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, filterType, selectedMonth]);
+  }, [searchTerm, filterType, selectedMonth, statusFilter]);
 
   const RatingStars = ({ rating, size = "w-4 h-4" }: { rating: number, size?: string }) => {
     const fullStars = Math.floor(rating);
@@ -289,6 +316,15 @@ export default function AdminFeedbackPage() {
             );
           })}
         </select>
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value as any)}
+          className="py-3 px-4 rounded-xl bg-white border border-slate-200 text-slate-600 outline-none focus:border-orange-200 focus:ring-4 focus:ring-orange-50 transition-all duration-200 cursor-pointer min-w-[140px]"
+        >
+          <option value="all">All Status</option>
+          <option value="read">Read</option>
+          <option value="unread">Unread</option>
+        </select>
       </div>
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
@@ -344,10 +380,11 @@ export default function AdminFeedbackPage() {
                             </td>
                           </tr>
                         )}
-                        <tr className="hover:bg-slate-50/50 transition-colors group">
-                          <td className="px-6 py-4">
+                        <tr className={`hover:bg-slate-50/50 transition-colors group ${f.isRead ? 'bg-white' : 'bg-orange-50/80'}`}>
+                          <td className="px-6 py-4 relative">
+                            {!f.isRead && <div className="absolute left-0 top-0 bottom-0 w-1 bg-orange-500" />}
                             <div className="space-y-1">
-                              <p className="font-semibold text-slate-800 line-clamp-1">{f.name}</p>
+                              <p className={`line-clamp-1 ${f.isRead ? 'font-semibold text-slate-800' : 'font-black text-slate-950'}`}>{f.name}</p>
                               <p className="text-xs text-slate-400 flex items-center gap-1">
                                 <Mail className="w-3 h-3" /> {f.email}
                               </p>
@@ -376,6 +413,16 @@ export default function AdminFeedbackPage() {
                                 title={f.isHidden === "true" ? "Show on Homepage" : "Hide from Homepage"}
                               >
                                 {f.isHidden === "true" ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleToggleRead(f);
+                                }}
+                                className={`p-2 rounded-lg transition-colors ${f.isRead ? 'text-slate-400 hover:bg-slate-100' : 'text-emerald-600 hover:bg-emerald-50'}`}
+                                title={f.isRead ? "Mark as Unread" : "Mark as Read"}
+                              >
+                                {f.isRead ? <RotateCcw className="w-4 h-4" /> : <Check className="w-4 h-4" />}
                               </button>
                               <button 
                                 onClick={() => setSelectedFeedback(f)}

@@ -7,6 +7,7 @@ import {
   Search, 
   Trash2, 
   Eye, 
+  EyeOff,
   Loader2,
   Calendar,
   User,
@@ -16,7 +17,9 @@ import {
   Building2,
   Package,
   Layers,
-  X
+  X,
+  Check,
+  RotateCcw
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format, parseISO } from "date-fns";
@@ -40,6 +43,7 @@ interface Inquiry {
   category: { name: string };
   product: { name: string };
   createdAt: string;
+  isRead: boolean;
 }
 
 export default function AdminInquiriesPage() {
@@ -51,6 +55,7 @@ export default function AdminInquiriesPage() {
   // New States for Pagination & Month Filter
   const [selectedMonth, setSelectedMonth] = useState<string>("current");
   const [currentPage, setCurrentPage] = useState(1);
+  const [statusFilter, setStatusFilter] = useState<"all" | "read" | "unread">("all");
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const ITEMS_PER_PAGE = 25;
@@ -113,6 +118,25 @@ export default function AdminInquiriesPage() {
     }
   };
 
+  const handleToggleRead = async (inquiry: Inquiry) => {
+    try {
+      await adminFetch(`/api/v1/inquiries/${inquiry._id}`, {
+        method: "PATCH",
+        body: { isRead: !inquiry.isRead },
+      });
+      toast({
+        title: inquiry.isRead ? "Marked as unread" : "Marked as read",
+      });
+      fetchInquiries();
+    } catch (err: any) {
+      toast({
+        title: "Action failed",
+        description: err.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   const availableMonths = useMemo(() => {
     const months = new Set<string>();
     inquiries.forEach(i => {
@@ -135,13 +159,17 @@ export default function AdminInquiriesPage() {
         matchesMonth = itemMonth === targetMonth;
       }
 
-      return matchesSearch && matchesMonth;
+      let matchesStatus = true;
+      if (statusFilter === "read") matchesStatus = !!i.isRead;
+      if (statusFilter === "unread") matchesStatus = !i.isRead;
+
+      return matchesSearch && matchesMonth && matchesStatus;
     });
 
     // Sort descending by date
     result.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
     return result;
-  }, [inquiries, searchTerm, selectedMonth]);
+  }, [inquiries, searchTerm, selectedMonth, statusFilter]);
 
   const totalPages = Math.ceil(processedInquiries.length / ITEMS_PER_PAGE) || 1;
   const paginatedInquiries = processedInquiries.slice(
@@ -151,7 +179,7 @@ export default function AdminInquiriesPage() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, selectedMonth]);
+  }, [searchTerm, selectedMonth, statusFilter]);
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -188,6 +216,15 @@ export default function AdminInquiriesPage() {
               </option>
             );
           })}
+        </select>
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value as any)}
+          className="py-3 px-4 rounded-xl bg-white border border-slate-200 text-slate-600 outline-none focus:border-orange-200 focus:ring-4 focus:ring-orange-50 transition-all duration-200 cursor-pointer min-w-[140px]"
+        >
+          <option value="all">All Status</option>
+          <option value="read">Read</option>
+          <option value="unread">Unread</option>
         </select>
       </div>
 
@@ -244,10 +281,11 @@ export default function AdminInquiriesPage() {
                             </td>
                           </tr>
                         )}
-                        <tr className="hover:bg-slate-50/50 transition-colors group">
-                          <td className="px-6 py-4">
+                        <tr className={`hover:bg-slate-50/50 transition-colors group ${inquiry.isRead ? 'bg-white' : 'bg-orange-50/80'}`}>
+                          <td className="px-6 py-4 relative">
+                            {!inquiry.isRead && <div className="absolute left-0 top-0 bottom-0 w-1 bg-orange-500" />}
                             <div className="space-y-1">
-                              <p className="font-semibold text-slate-800 line-clamp-1">{inquiry.name}</p>
+                              <p className={`line-clamp-1 ${inquiry.isRead ? 'font-semibold text-slate-800' : 'font-black text-slate-950'}`}>{inquiry.name}</p>
                               <p className="text-xs text-slate-400 flex items-center gap-1">
                                 <Mail className="w-3 h-3" /> {inquiry.email}
                               </p>
@@ -282,6 +320,16 @@ export default function AdminInquiriesPage() {
                                 title="View Message"
                               >
                                 <Eye className="w-4 h-4" />
+                              </button>
+                              <button 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleToggleRead(inquiry);
+                                }}
+                                className={`p-2 rounded-lg transition-colors ${inquiry.isRead ? 'text-slate-400 hover:bg-slate-100' : 'text-emerald-600 hover:bg-emerald-50'}`}
+                                title={inquiry.isRead ? "Mark as Unread" : "Mark as Read"}
+                              >
+                                {inquiry.isRead ? <RotateCcw className="w-4 h-4" /> : <Check className="w-4 h-4" />}
                               </button>
                               <button 
                                 onClick={() => setDeleteId(inquiry._id)}

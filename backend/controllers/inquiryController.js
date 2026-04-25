@@ -40,4 +40,5 @@ exports.createInquiry = catchAsync(async (req, res, next) => {
 });
 exports.getAllInquiries = factory.getAll(Inquiry);
 exports.getInquiry = factory.getOne(Inquiry);
+exports.updateInquiry = factory.updateOne(Inquiry);
 exports.deleteInquiry = factory.deleteOne(Inquiry);

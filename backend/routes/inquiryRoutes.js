@@ -12,6 +12,7 @@ router
 router
   .route("/:id")
   .get(authController.protect, inquiryController.getInquiry)
+  .patch(authController.protect, inquiryController.updateInquiry)
   .delete(authController.protect, inquiryController.deleteInquiry);
 
 module.exports = router;

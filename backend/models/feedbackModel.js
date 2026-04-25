@@ -39,6 +39,10 @@ const feedbackSchema = new mongoose.Schema({
         type: String,
         default: "false",
         enum: ["true", "false"]
+    },
+    isRead: {
+        type: Boolean,
+        default: false
     }
 }, {
     toJSON: { virtuals: true },
