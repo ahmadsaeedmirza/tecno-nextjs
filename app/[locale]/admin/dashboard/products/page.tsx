@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { adminFetch } from "@/lib/api-client";
+import { adminFetch, API_BASE_URL } from "@/lib/api-client";
 import {
   Package,
   Plus,
@@ -678,7 +678,7 @@ export default function AdminProductsPage() {
                                 product.imageCover
                                   ? product.imageCover.startsWith("http")
                                     ? encodeUrlPathSegments(product.imageCover)
-                                    : `${encodeUrlPathSegments(`/products/${product.imageCover}`)}?v=${encodeURIComponent(product.imageCover)}`
+                                    : `${encodeUrlPathSegments(`${API_BASE_URL}/products/${product.imageCover}`)}?v=${encodeURIComponent(product.imageCover)}`
                                   : "https://placehold.co/100x100?text=Product"
                               }
                               alt={product.name}

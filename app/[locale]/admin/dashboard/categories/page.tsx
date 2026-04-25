@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { adminFetch } from "@/lib/api-client";
+import { adminFetch, API_BASE_URL } from "@/lib/api-client";
+import { encodeUrlPathSegments } from "@/lib/utils";
 import {
   Layers,
   Plus,
@@ -424,12 +425,13 @@ export default function AdminCategoriesPage() {
                               src={
                                 category.imageCover
                                   ? category.imageCover.startsWith("http")
-                                    ? category.imageCover
-                                    : `/categories/${category.imageCover}`
+                                    ? encodeUrlPathSegments(category.imageCover)
+                                    : encodeUrlPathSegments(`${API_BASE_URL}/categories/${category.imageCover}`)
                                   : "https://placehold.co/100x100?text=Category"
                               }
                               alt={category.name}
                               fill
+                              unoptimized
                               className="object-cover"
                             />
                           </div>

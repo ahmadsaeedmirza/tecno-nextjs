@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { adminFetch } from "@/lib/api-client";
+import { adminFetch, API_BASE_URL } from "@/lib/api-client";
+import { encodeUrlPathSegments } from "@/lib/utils";
 import {
   Calendar,
   Plus,
@@ -484,12 +485,13 @@ export default function AdminEventsPage() {
                               src={
                                 event.imageCover
                                   ? event.imageCover.startsWith("http")
-                                    ? event.imageCover
-                                    : `/events/${event.imageCover}`
+                                    ? encodeUrlPathSegments(event.imageCover)
+                                    : encodeUrlPathSegments(`${API_BASE_URL}/events/${event.imageCover}`)
                                   : "https://placehold.co/100x100?text=Event"
                               }
                               alt={event.name}
                               fill
+                              unoptimized
                               className="object-cover"
                             />
                           </div>
