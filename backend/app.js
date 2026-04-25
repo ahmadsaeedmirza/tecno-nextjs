@@ -57,7 +57,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 // Handle preflight requests for all routes
-app.options("*", cors(corsOptions));
+app.options(/.*/, cors(corsOptions));
 
 // SERVING STATIC FILES
 app.use(express.static(path.join(__dirname, "../public")));
