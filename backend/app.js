@@ -29,16 +29,35 @@ app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 app.use(cookieParser());
 
 // ── CORS ─────────────────────────────────────────────────────────────────────
+const whitelist = [
+  "http://localhost:3000",
+  "http://127.0.0.1:3000",
+  process.env.FRONTEND_URL,
+  "https://tecno-instruments.vercel.app" // Explicitly added to be safe
+].filter(Boolean);
+
 const corsOptions = {
-  origin: [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    process.env.FRONTEND_URL,
-  ].filter(Boolean),
+  origin: function (origin, callback) {
+    // allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+
+    // Check if the origin is in the whitelist or is a vercel preview branch
+    if (whitelist.indexOf(origin) !== -1 || origin.endsWith(".vercel.app")) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true,
+  methods: ["GET", "POST", "PATCH", "DELETE", "PUT", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept"]
 };
+
+// Apply CORS to all routes
 app.use(cors(corsOptions));
-app.options(/.*/, cors(corsOptions));
+
+// Handle preflight requests for all routes
+app.options("*", cors(corsOptions));
 
 // SERVING STATIC FILES
 app.use(express.static(path.join(__dirname, "../public")));
