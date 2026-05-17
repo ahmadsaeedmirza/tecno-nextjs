@@ -33,7 +33,8 @@ const whitelist = [
   "http://localhost:3000",
   "http://127.0.0.1:3000",
   process.env.FRONTEND_URL,
-  "https://tecno-instruments.vercel.app" // Explicitly added to be safe
+  "https://tecno-instruments.vercel.app",
+  "https://www.tecnoinstruments.online", // Explicitly added to be safe
 ].filter(Boolean);
 
 const corsOptions = {
@@ -50,7 +51,12 @@ const corsOptions = {
   },
   credentials: true,
   methods: ["GET", "POST", "PATCH", "DELETE", "PUT", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept"]
+  allowedHeaders: [
+    "Content-Type",
+    "Authorization",
+    "X-Requested-With",
+    "Accept",
+  ],
 };
 
 // Apply CORS to all routes
@@ -68,14 +74,27 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        connectSrc: ["'self'", "http://localhost:8000", "ws://localhost:8000", "http://127.0.0.1:8000", "ws://127.0.0.1:8000", "https://tecno-nextjs.vercel.app"],
+        connectSrc: [
+          "'self'",
+          "http://localhost:8000",
+          "ws://localhost:8000",
+          "http://127.0.0.1:8000",
+          "ws://127.0.0.1:8000",
+          "https://tecno-nextjs.vercel.app",
+        ],
         scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
-        imgSrc: ["'self'", "data:", "blob:", "http://localhost:8000", "https://tecno-nextjs.vercel.app"],
+        imgSrc: [
+          "'self'",
+          "data:",
+          "blob:",
+          "http://localhost:8000",
+          "https://tecno-nextjs.vercel.app",
+        ],
       },
     },
-    crossOriginResourcePolicy: { policy: "cross-origin" }
-  })
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+  }),
 );
 
 // ── DEVELOPMENT LOGGING ───────────────────────────────────────────────────────
